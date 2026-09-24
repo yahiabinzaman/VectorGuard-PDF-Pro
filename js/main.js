@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var docMeta = document.getElementById("docMeta");
   var badgeArtboards = document.getElementById("badgeArtboards");
   var btnRefresh = document.getElementById("btnRefresh");
+  var statusDot = document.getElementById("statusDot");
 
   var chips = document.querySelectorAll(".chip");
   var customScaleInput = document.getElementById("customScaleInput");
@@ -87,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
     txtArtboardRange.focus();
   });
 
-  // 4. Helper: Open URLs in Default Browser
+  // 4. Open External URLs
   function openExternal(url) {
     try {
       if (window.cep && window.cep.util && window.cep.util.openURLInDefaultBrowser) {
@@ -102,7 +103,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Developer GitHub Link
   if (linkGithub) {
     linkGithub.addEventListener("click", function (e) {
       e.preventDefault();
@@ -115,7 +115,6 @@ document.addEventListener("DOMContentLoaded", function () {
     csInterface.evalScript("ClientPdfHost.getDocInfo()", function (res) {
       try {
         if (!res || res === "EvalScript error." || res === "undefined") {
-          // Retry or load hostscript if needed
           csInterface.evalScript('$.evalFile("' + csInterface.getSystemPath(SystemPath.EXTENSION) + '/jsx/hostscript.jsx")', function () {
             csInterface.evalScript("ClientPdfHost.getDocInfo()", handleDocInfoResponse);
           });
@@ -123,8 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         handleDocInfoResponse(res);
       } catch (err) {
-        docTitle.innerText = "Ready";
-        docMeta.innerText = "Click Refresh after opening document";
+        handleDocInfoResponse(null);
       }
     });
   }
@@ -135,9 +133,10 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data && data.hasDoc) {
         docInfo = data;
         docTitle.innerText = data.docName || "Active Document";
-        docMeta.innerText = (data.colorSpace || "RGB") + " Document";
+        docMeta.innerText = (data.colorSpace || "RGB") + " Document • Ready";
         badgeArtboards.innerText = (data.artboardCount || 1) + " Page" + (data.artboardCount > 1 ? "s" : "");
         badgeArtboards.style.display = "inline-block";
+        if (statusDot) statusDot.className = "doc-status-indicator";
 
         if (!txtOutputDir.value || txtOutputDir.value.trim() === "" || txtOutputDir.value.indexOf("Desktop") !== -1) {
           txtOutputDir.value = data.docPath;
@@ -149,13 +148,14 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         docInfo = null;
         docTitle.innerText = "No Document Open";
-        docMeta.innerText = "Open a file in Illustrator";
+        docMeta.innerText = "Please open a project file in Illustrator";
         badgeArtboards.style.display = "none";
+        if (statusDot) statusDot.className = "doc-status-indicator inactive";
         btnGenerate.disabled = true;
       }
     } catch (e) {
-      docTitle.innerText = "Active";
-      docMeta.innerText = "Illustrator connected";
+      docTitle.innerText = "Illustrator Active";
+      docMeta.innerText = "Click ↻ to detect open file";
       badgeArtboards.style.display = "none";
       btnGenerate.disabled = false;
     }
@@ -163,7 +163,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   btnRefresh.addEventListener("click", refreshDocInfo);
 
-  // Auto-refresh when document activates
   try {
     csInterface.addEventListener("documentAfterActivate", refreshDocInfo);
     csInterface.addEventListener("documentAfterDeactivate", refreshDocInfo);
@@ -183,7 +182,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // 7. Generate Action
   btnGenerate.addEventListener("click", function () {
     hideResult();
-    setLoading(true, "Exporting " + currentScale + "% flattened pages...");
+    setLoading(true, "Exporting " + currentScale + "% raster pages...");
 
     var isTransparent = false;
     var pngRadios = document.getElementsByName("pngBg");
@@ -215,7 +214,7 @@ document.addEventListener("DOMContentLoaded", function () {
           lastPdfPath = data.pdfPath;
           showResult(true, "🎉 PDF Created! (" + data.pageCount + " pages @ " + data.resolution + ")");
         } else {
-          showResult(false, "❌ Error: " + (data.error || "Failed to generate PDF."));
+          showResult(false, "❌ " + (data.error || "Failed to generate PDF."));
         }
       } catch (err) {
         showResult(false, "❌ " + (res || "Could not complete operation."));
@@ -235,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (isLoading) {
       btnGenerate.disabled = true;
       progressContainer.style.display = "block";
-      progressText.innerText = text || "Working...";
+      progressText.innerText = text || "Processing...";
     } else {
       btnGenerate.disabled = false;
       progressContainer.style.display = "none";

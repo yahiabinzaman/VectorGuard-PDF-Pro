@@ -9,37 +9,27 @@
 <body>
 
   <div class="app-wrapper">
-    <!-- Main Scrollable Content -->
+    <!-- Main Content -->
     <div class="main-content">
-      
-      <!-- Header -->
-      <header class="header">
-        <div class="logo-badge">
-          <img src="icons/iconDarkNormal.png" alt="VectorGuard Logo">
-        </div>
-        <div class="header-text">
-          <h1>VectorGuard PDF Pro</h1>
-          <p>Protected Flattened Multi-Page PDF</p>
-        </div>
-      </header>
 
-      <!-- Active Document Card -->
+      <!-- Compact Active Document Status Strip -->
       <div class="doc-card" id="docCard">
+        <div class="doc-status-indicator" id="statusDot"></div>
         <div class="doc-info">
-          <span class="doc-title" id="docTitle">Checking Document...</span>
-          <div class="doc-meta">
-            <span id="docMeta">Detecting Illustrator File...</span>
+          <div class="doc-title-row">
+            <span class="doc-title" id="docTitle">Checking Document...</span>
             <span class="badge-artboards" id="badgeArtboards" style="display:none;">0 Pages</span>
           </div>
+          <span class="doc-meta" id="docMeta">Detecting Illustrator File...</span>
         </div>
-        <button class="btn-refresh" id="btnRefresh" title="Refresh Active Document">↻ Refresh</button>
+        <button class="btn-refresh" id="btnRefresh" title="Refresh Active Document">↻</button>
       </div>
 
       <!-- Resolution / Scale Settings -->
       <div class="section-panel">
         <div class="section-label">
           <span>Resolution / Scale</span>
-          <span style="font-size:9px; text-transform:none; color:var(--adobe-text-dim);">2x is recommended</span>
+          <span class="sub-hint">2x is recommended</span>
         </div>
         <div class="chip-grid">
           <div class="chip" data-scale="100">1x (100%)</div>
@@ -62,27 +52,29 @@
         </div>
         
         <div class="sub-options" id="pngOptionsRow">
-          <span>PNG Background:</span>
-          <label class="checkbox-label">
-            <input type="radio" name="pngBg" value="white" checked> White
-          </label>
-          <label class="checkbox-label">
-            <input type="radio" name="pngBg" value="transparent"> Transparent
-          </label>
+          <span>Background:</span>
+          <div style="display: flex; gap: 10px;">
+            <label class="checkbox-label">
+              <input type="radio" name="pngBg" value="white" checked> White
+            </label>
+            <label class="checkbox-label">
+              <input type="radio" name="pngBg" value="transparent"> Transparent
+            </label>
+          </div>
         </div>
       </div>
 
       <!-- Artboards Selection -->
       <div class="section-panel">
-        <div class="section-label">Artboards to Include</div>
-        <div style="display: flex; gap: 14px; margin-bottom: 4px;">
+        <div class="section-label">Artboards To Include</div>
+        <div style="display: flex; gap: 14px; margin-bottom: 3px;">
           <label class="checkbox-label">
             <input type="radio" name="artboardMode" value="all" checked id="abModeAll">
             <span>All Artboards</span>
           </label>
           <label class="checkbox-label">
             <input type="radio" name="artboardMode" value="range" id="abModeRange">
-            <span>Custom Range</span>
+            <span>Specific Pages</span>
           </label>
         </div>
         <div class="input-group" id="rangeInputGroup" style="display: none;">
@@ -98,23 +90,23 @@
           <button class="btn-secondary" id="btnBrowseDir">Browse</button>
         </div>
 
-        <div class="input-group" style="margin-top: 5px;">
+        <div class="input-group" style="margin-top: 4px;">
           <input type="text" class="input-field" id="txtPdfName" placeholder="Client_Preview.pdf">
         </div>
 
-        <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 5px;">
+        <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
           <label class="checkbox-label">
             <input type="checkbox" id="chkOpenPdf" checked>
             <span>Open PDF automatically when done</span>
           </label>
           <label class="checkbox-label">
             <input type="checkbox" id="chkAutoClean" checked>
-            <span>Delete temporary image files</span>
+            <span>Auto-delete temporary image files</span>
           </label>
         </div>
       </div>
 
-      <!-- Action Button -->
+      <!-- Primary Action Button -->
       <button class="btn-primary" id="btnGenerate">
         <span>🚀 Create Client PDF</span>
       </button>
@@ -140,7 +132,7 @@
 
     </div>
 
-    <!-- Fixed Sticky Footer with Developer Credits -->
+    <!-- Fixed Footer -->
     <footer class="footer">
       <a class="dev-credit" id="linkGithub" title="Visit Developer's GitHub Profile">
         <svg class="github-icon" viewBox="0 0 16 16" version="1.1" aria-hidden="true">

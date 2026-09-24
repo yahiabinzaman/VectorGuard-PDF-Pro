@@ -1,9 +1,98 @@
 #target illustrator
 
 /**
- * HostScript for Client PDF Creator CEP Extension
+ * ==============================================================================
+ * JSON2 Polyfill for ExtendScript (ES3)
+ * ==============================================================================
  */
+if (typeof JSON !== "object") {
+    JSON = {};
+}
+(function () {
+    "use strict";
+    var rx_one = /^[\],:{}\s]*$/,
+        rx_two = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
+        rx_three = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
+        rx_four = /(?:^|:|,)(?:\s*\[)+/g,
+        rx_escapable = /[\\\"\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        meta = {
+            "\b": "\\b",
+            "\t": "\\t",
+            "\n": "\\n",
+            "\f": "\\f",
+            "\r": "\\r",
+            "\"": "\\\"",
+            "\\": "\\\\"
+        };
 
+    function quote(string) {
+        rx_escapable.lastIndex = 0;
+        return rx_escapable.test(string) ? "\"" + string.replace(rx_escapable, function (a) {
+            var c = meta[a];
+            return typeof c === "string" ? c : "\\u" + ("0000" + a.charCodeAt(0).toString(16)).slice(-4);
+        }) + "\"" : "\"" + string + "\"";
+    }
+
+    function str(key, holder) {
+        var i, k, v, length, mind = "", partial, value = holder[key];
+        if (value && typeof value === "object" && typeof value.toJSON === "function") {
+            value = value.toJSON(key);
+        }
+        switch (typeof value) {
+            case "string":
+                return quote(value);
+            case "number":
+                return isFinite(value) ? String(value) : "null";
+            case "boolean":
+            case "null":
+                return String(value);
+            case "object":
+                if (!value) return "null";
+                partial = [];
+                if (Object.prototype.toString.apply(value) === "[object Array]") {
+                    length = value.length;
+                    for (i = 0; i < length; i += 1) {
+                        partial[i] = str(i, value) || "null";
+                    }
+                    return partial.length === 0 ? "[]" : "[" + partial.join(",") + "]";
+                }
+                for (k in value) {
+                    if (Object.prototype.hasOwnProperty.call(value, k)) {
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + ":" + v);
+                        }
+                    }
+                }
+                return partial.length === 0 ? "{}" : "{" + partial.join(",") + "}";
+        }
+    }
+
+    if (typeof JSON.stringify !== "function") {
+        JSON.stringify = function (value) {
+            return str("", { "": value });
+        };
+    }
+
+    if (typeof JSON.parse !== "function") {
+        JSON.parse = function (text) {
+            var j;
+            text = String(text);
+            rx_one.lastIndex = 0;
+            if (rx_one.test(text.replace(rx_two, "@").replace(rx_three, "]").replace(rx_four, ""))) {
+                j = eval("(" + text + ")");
+                return j;
+            }
+            throw new SyntaxError("JSON.parse error");
+        };
+    }
+}());
+
+/**
+ * ==============================================================================
+ * HostScript for VectorGuard PDF Pro
+ * ==============================================================================
+ */
 var ClientPdfHost = {
     /**
      * Get document info for the CEP panel UI
@@ -74,7 +163,7 @@ var ClientPdfHost = {
     generatePdf: function (configJsonStr) {
         try {
             if (!app.documents || app.documents.length === 0) {
-                return JSON.stringify({ success: false, error: "No document is open in Illustrator." });
+                return JSON.stringify({ success: false, error: "No active document open in Illustrator." });
             }
 
             var cfg = JSON.parse(configJsonStr);
@@ -82,8 +171,9 @@ var ClientPdfHost = {
             var totalArtboards = sourceDoc.artboards.length;
 
             var scaleMultiplier = parseFloat(cfg.scaleMultiplier) || 200;
-            var isPNG = cfg.format === "PNG";
-            var isTransparent = isPNG && cfg.transparent === true;
+            var isPNG = (cfg.format === "PNG");
+            var isTransparent = isPNG && (cfg.transparent === true);
+            
             var outputFolder = new Folder(cfg.outputDir || Folder.desktop.fsName);
             if (!outputFolder.exists) {
                 outputFolder.create();
@@ -95,7 +185,7 @@ var ClientPdfHost = {
             }
             var finalPdfFile = new File(outputFolder.fsName + "/" + pdfFileName);
 
-            // Determine Artboards
+            // Determine Selected Artboards
             var artboardIndices = [];
             if (cfg.artboardMode === "all") {
                 for (var a = 0; a < totalArtboards; a++) {
@@ -127,11 +217,11 @@ var ClientPdfHost = {
             }
 
             if (artboardIndices.length === 0) {
-                return JSON.stringify({ success: false, error: "No valid artboards selected for export." });
+                return JSON.stringify({ success: false, error: "No valid artboards selected." });
             }
 
-            // Temp folder
-            var tempDirName = "ai_pdf_temp_" + (new Date().getTime());
+            // Create clean temp folder
+            var tempDirName = "vectorguard_temp_" + (new Date().getTime());
             var tempFolder = new Folder(Folder.temp.fsName + "/" + tempDirName);
             if (!tempFolder.exists) {
                 tempFolder.create();
@@ -141,7 +231,7 @@ var ClientPdfHost = {
             var artboardRects = [];
             var artboardNames = [];
 
-            // Step 1: Export individual artboards
+            // Step 1: Export individual artboards as images
             for (var i = 0; i < artboardIndices.length; i++) {
                 var abIdx = artboardIndices[i];
                 var ab = sourceDoc.artboards[abIdx];
@@ -150,8 +240,9 @@ var ClientPdfHost = {
 
                 sourceDoc.artboards.setActiveArtboardIndex(abIdx);
 
+                var filePrefix = "vg_page_" + ClientPdfHost.padZero(i + 1, 4);
                 var ext = isPNG ? ".png" : ".jpg";
-                var tempImgFile = new File(tempFolder.fsName + "/page_" + ClientPdfHost.padZero(i + 1, 4) + ext);
+                var tempImgFile = new File(tempFolder.fsName + "/" + filePrefix + ext);
 
                 if (isPNG) {
                     var pngOpts = new ExportOptionsPNG24();
@@ -177,10 +268,19 @@ var ClientPdfHost = {
                     sourceDoc.exportFile(tempImgFile, ExportType.JPEG, jpgOpts);
                 }
 
-                exportedFiles.push(tempImgFile);
+                // Robust fallback if Illustrator renamed with artboard suffix
+                var actualFile = tempImgFile;
+                if (!actualFile.exists) {
+                    var matches = tempFolder.getFiles(filePrefix + "*");
+                    if (matches && matches.length > 0) {
+                        actualFile = matches[0];
+                    }
+                }
+
+                exportedFiles.push(actualFile);
             }
 
-            // Step 2: Create a fresh document and place images
+            // Step 2: Create a new document matching all artboards
             var colorSpace = sourceDoc.documentColorSpace;
             var newDoc = app.documents.add(colorSpace);
 
@@ -207,15 +307,15 @@ var ClientPdfHost = {
                 var bottom = rect[3];
 
                 placed.position = [left, top];
-                placed.width = right - left;
-                placed.height = top - bottom;
+                placed.width = Math.abs(right - left);
+                placed.height = Math.abs(top - bottom);
                 placed.embed();
             }
 
-            // Step 3: Save as PDF
+            // Step 3: Save as Uneditable Client PDF
             var pdfOptions = new PDFSaveOptions();
             pdfOptions.compatibility = PDFCompatibility.ACROBAT5;
-            pdfOptions.preserveEditability = false; // CRITICAL: Protect vector assets
+            pdfOptions.preserveEditability = false; // CRITICAL: Protect source vectors
             pdfOptions.generateThumbnails = true;
             pdfOptions.viewAfterSaving = false;
             pdfOptions.optimization = true;
@@ -224,7 +324,7 @@ var ClientPdfHost = {
             newDoc.saveAs(finalPdfFile, pdfOptions);
             newDoc.close(SaveOptions.DONOTSAVECHANGES);
 
-            // Step 4: Cleanup
+            // Step 4: Cleanup temporary files
             if (cfg.autoClean !== false) {
                 for (var f = 0; f < exportedFiles.length; f++) {
                     try {
