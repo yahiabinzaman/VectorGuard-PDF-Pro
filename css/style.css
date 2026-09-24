@@ -1,0 +1,508 @@
+/* Adobe Native Dark UI Design System */
+:root {
+  --adobe-bg: #2b2b2b;
+  --adobe-panel-bg: #323232;
+  --adobe-group-bg: #262626;
+  --adobe-input-bg: #1e1e1e;
+  --adobe-input-border: #3d3d3d;
+  --adobe-input-focus: #3b82f6;
+  --adobe-text-main: #e0e0e0;
+  --adobe-text-muted: #999999;
+  --adobe-text-dim: #777777;
+  --adobe-accent: #e04836;
+  --adobe-accent-hover: #f05442;
+  --adobe-accent-gradient: linear-gradient(180deg, #e84c3d 0%, #c43224 100%);
+  --adobe-btn-bg: #3a3a3a;
+  --adobe-btn-border: #4a4a4a;
+  --adobe-btn-hover: #484848;
+  --adobe-btn-active: #292929;
+  --adobe-border: #383838;
+  --adobe-border-subtle: rgba(255, 255, 255, 0.06);
+  --adobe-radius: 4px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--adobe-bg);
+  color: var(--adobe-text-main);
+  font-size: 11px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 12px 14px 12px;
+}
+
+/* Native Scrollbar */
+.main-content::-webkit-scrollbar {
+  width: 6px;
+}
+.main-content::-webkit-scrollbar-track {
+  background: var(--adobe-bg);
+}
+.main-content::-webkit-scrollbar-thumb {
+  background: #444444;
+  border-radius: 3px;
+}
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--adobe-border);
+}
+
+.logo-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--adobe-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--adobe-accent-gradient);
+  flex-shrink: 0;
+}
+
+.logo-badge img {
+  width: 18px;
+  height: 18px;
+}
+
+.header-text h1 {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.1px;
+}
+
+.header-text p {
+  font-size: 10px;
+  color: var(--adobe-text-muted);
+}
+
+/* Status Card */
+.doc-card {
+  background: var(--adobe-group-bg);
+  border: 1px solid var(--adobe-border);
+  border-radius: var(--adobe-radius);
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.doc-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 2px;
+}
+
+.doc-title {
+  font-weight: 600;
+  font-size: 11.5px;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-meta {
+  font-size: 10px;
+  color: var(--adobe-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-artboards {
+  background: #1b3a5b;
+  color: #58a6ff;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 9.5px;
+  font-weight: 600;
+  border: 1px solid rgba(88, 166, 255, 0.3);
+}
+
+.btn-refresh {
+  background: var(--adobe-btn-bg);
+  border: 1px solid var(--adobe-btn-border);
+  color: var(--adobe-text-main);
+  border-radius: var(--adobe-radius);
+  padding: 3px 7px;
+  cursor: pointer;
+  font-size: 10.5px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.btn-refresh:hover {
+  background: var(--adobe-btn-hover);
+  color: #ffffff;
+}
+.btn-refresh:active {
+  background: var(--adobe-btn-active);
+}
+
+/* Native Adobe Panels */
+.section-panel {
+  background: var(--adobe-group-bg);
+  border: 1px solid var(--adobe-border);
+  border-radius: var(--adobe-radius);
+  padding: 9px 10px;
+  margin-bottom: 8px;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--adobe-text-muted);
+  margin-bottom: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Native Segmented Controls / Chips */
+.chip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 68px;
+  gap: 4px;
+}
+
+.chip {
+  background: var(--adobe-btn-bg);
+  border: 1px solid var(--adobe-btn-border);
+  color: var(--adobe-text-main);
+  border-radius: var(--adobe-radius);
+  padding: 5px 2px;
+  font-size: 10.5px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip:hover {
+  background: var(--adobe-btn-hover);
+  color: #ffffff;
+}
+
+.chip.active {
+  background: #3e5369;
+  border-color: #58a6ff;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.custom-scale-input {
+  background: var(--adobe-input-bg);
+  border: 1px solid var(--adobe-input-border);
+  color: #ffffff;
+  border-radius: var(--adobe-radius);
+  padding: 4px 6px;
+  font-size: 10.5px;
+  text-align: center;
+  outline: none;
+  width: 100%;
+}
+.custom-scale-input:focus {
+  border-color: var(--adobe-input-focus);
+}
+
+/* Format Segmented Button */
+.format-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.format-btn {
+  background: var(--adobe-btn-bg);
+  border: 1px solid var(--adobe-btn-border);
+  color: var(--adobe-text-main);
+  border-radius: var(--adobe-radius);
+  padding: 5px 6px;
+  font-size: 10.5px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.format-btn:hover {
+  background: var(--adobe-btn-hover);
+  color: #ffffff;
+}
+
+.format-btn.active {
+  background: #3e5369;
+  border-color: #58a6ff;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Sub-options Row */
+.sub-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 10.5px;
+  color: var(--adobe-text-muted);
+}
+
+/* Native Radio / Checkbox */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-size: 10.5px;
+  color: var(--adobe-text-main);
+}
+
+.checkbox-label input[type="checkbox"],
+.checkbox-label input[type="radio"] {
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+/* Input Fields */
+.input-group {
+  margin-top: 6px;
+}
+
+.input-field {
+  width: 100%;
+  background: var(--adobe-input-bg);
+  border: 1px solid var(--adobe-input-border);
+  border-radius: var(--adobe-radius);
+  color: #ffffff;
+  padding: 5px 8px;
+  font-size: 11px;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: var(--adobe-input-focus);
+}
+
+.input-with-btn {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-secondary {
+  background: var(--adobe-btn-bg);
+  border: 1px solid var(--adobe-btn-border);
+  color: var(--adobe-text-main);
+  border-radius: var(--adobe-radius);
+  padding: 0 10px;
+  font-size: 10.5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-secondary:hover {
+  background: var(--adobe-btn-hover);
+  color: #ffffff;
+}
+
+.btn-secondary:active {
+  background: var(--adobe-btn-active);
+}
+
+/* Primary Native Adobe Action Button */
+.btn-primary {
+  width: 100%;
+  background: var(--adobe-accent-gradient);
+  border: 1px solid #d23f30;
+  color: #ffffff;
+  padding: 9px;
+  border-radius: var(--adobe-radius);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  transition: all 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(180deg, #f05442 0%, #d4382a 100%);
+  box-shadow: 0 2px 8px rgba(224, 72, 54, 0.4);
+}
+
+.btn-primary:active {
+  background: #c43224;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Progress Container */
+.progress-container {
+  display: none;
+  margin-top: 8px;
+  background: var(--adobe-group-bg);
+  border: 1px solid var(--adobe-border);
+  border-radius: var(--adobe-radius);
+  padding: 8px 10px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--adobe-text-muted);
+  margin-bottom: 5px;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 5px;
+  background: #1e1e1e;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--adobe-accent-gradient);
+  border-radius: 2px;
+  animation: pulse-bar 1.2s infinite ease-in-out;
+}
+
+@keyframes pulse-bar {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* Result Box */
+.result-box {
+  display: none;
+  margin-top: 8px;
+  padding: 7px 10px;
+  border-radius: var(--adobe-radius);
+  background: rgba(46, 160, 67, 0.15);
+  border: 1px solid rgba(46, 160, 67, 0.4);
+  color: #3fb950;
+  font-size: 10.5px;
+}
+
+.result-box.error {
+  background: rgba(248, 81, 73, 0.15);
+  border-color: rgba(248, 81, 73, 0.4);
+  color: #f85149;
+}
+
+.result-actions {
+  margin-top: 4px;
+}
+
+.result-link {
+  color: #ffffff;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Sticky Fixed Footer (Developer Credit) */
+.footer {
+  flex-shrink: 0;
+  background: #232323;
+  border-top: 1px solid var(--adobe-border);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dev-credit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--adobe-text-muted);
+  font-size: 10px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.dev-credit:hover {
+  color: #ffffff;
+}
+
+.dev-credit .github-icon {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+  opacity: 0.85;
+}
+
+.dev-credit .dev-name {
+  color: #58a6ff;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+
+.dev-credit:hover .dev-name {
+  color: #79c0ff;
+  text-decoration: underline;
+}
+
+.version-tag {
+  font-size: 9px;
+  color: var(--adobe-text-dim);
+  background: #1a1a1a;
+  padding: 1px 4px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}

@@ -1,0 +1,258 @@
+document.addEventListener("DOMContentLoaded", function () {
+  var csInterface = new CSInterface();
+
+  // Elements
+  var docTitle = document.getElementById("docTitle");
+  var docMeta = document.getElementById("docMeta");
+  var badgeArtboards = document.getElementById("badgeArtboards");
+  var btnRefresh = document.getElementById("btnRefresh");
+
+  var chips = document.querySelectorAll(".chip");
+  var customScaleInput = document.getElementById("customScaleInput");
+
+  var btnFormatPNG = document.getElementById("btnFormatPNG");
+  var btnFormatJPG = document.getElementById("btnFormatJPG");
+  var pngOptionsRow = document.getElementById("pngOptionsRow");
+
+  var abModeAll = document.getElementById("abModeAll");
+  var abModeRange = document.getElementById("abModeRange");
+  var rangeInputGroup = document.getElementById("rangeInputGroup");
+  var txtArtboardRange = document.getElementById("txtArtboardRange");
+
+  var txtOutputDir = document.getElementById("txtOutputDir");
+  var btnBrowseDir = document.getElementById("btnBrowseDir");
+  var txtPdfName = document.getElementById("txtPdfName");
+
+  var chkOpenPdf = document.getElementById("chkOpenPdf");
+  var chkAutoClean = document.getElementById("chkAutoClean");
+
+  var btnGenerate = document.getElementById("btnGenerate");
+  var progressContainer = document.getElementById("progressContainer");
+  var progressText = document.getElementById("progressText");
+
+  var resultBox = document.getElementById("resultBox");
+  var resultMessage = document.getElementById("resultMessage");
+  var linkOpenResult = document.getElementById("linkOpenResult");
+  var linkGithub = document.getElementById("linkGithub");
+
+  // State
+  var currentScale = 200;
+  var currentFormat = "PNG";
+  var lastPdfPath = "";
+  var docInfo = null;
+
+  // 1. Scale Chip Selection
+  chips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      chips.forEach(function (c) { c.classList.remove("active"); });
+      chip.classList.add("active");
+      currentScale = parseInt(chip.getAttribute("data-scale"), 10);
+      customScaleInput.value = "";
+    });
+  });
+
+  customScaleInput.addEventListener("input", function () {
+    var val = parseFloat(customScaleInput.value);
+    if (!isNaN(val) && val > 0) {
+      chips.forEach(function (c) { c.classList.remove("active"); });
+      currentScale = val;
+    }
+  });
+
+  // 2. Format Selection
+  btnFormatPNG.addEventListener("click", function () {
+    btnFormatPNG.classList.add("active");
+    btnFormatJPG.classList.remove("active");
+    currentFormat = "PNG";
+    pngOptionsRow.style.display = "flex";
+  });
+
+  btnFormatJPG.addEventListener("click", function () {
+    btnFormatJPG.classList.add("active");
+    btnFormatPNG.classList.remove("active");
+    currentFormat = "JPG";
+    pngOptionsRow.style.display = "none";
+  });
+
+  // 3. Artboard Mode Toggle
+  abModeAll.addEventListener("change", function () {
+    rangeInputGroup.style.display = "none";
+  });
+
+  abModeRange.addEventListener("change", function () {
+    rangeInputGroup.style.display = "block";
+    if (docInfo && docInfo.artboardCount) {
+      txtArtboardRange.value = "1-" + docInfo.artboardCount;
+    }
+    txtArtboardRange.focus();
+  });
+
+  // 4. Helper: Open URLs in Default Browser
+  function openExternal(url) {
+    try {
+      if (window.cep && window.cep.util && window.cep.util.openURLInDefaultBrowser) {
+        window.cep.util.openURLInDefaultBrowser(url);
+      } else if (csInterface && csInterface.openURLInDefaultBrowser) {
+        csInterface.openURLInDefaultBrowser(url);
+      } else {
+        window.open(url, "_blank");
+      }
+    } catch (e) {
+      window.open(url, "_blank");
+    }
+  }
+
+  // Developer GitHub Link
+  if (linkGithub) {
+    linkGithub.addEventListener("click", function (e) {
+      e.preventDefault();
+      openExternal("https://github.com/yahiabinzaman");
+    });
+  }
+
+  // 5. Refresh Active Document Info
+  function refreshDocInfo() {
+    csInterface.evalScript("ClientPdfHost.getDocInfo()", function (res) {
+      try {
+        if (!res || res === "EvalScript error." || res === "undefined") {
+          // Retry or load hostscript if needed
+          csInterface.evalScript('$.evalFile("' + csInterface.getSystemPath(SystemPath.EXTENSION) + '/jsx/hostscript.jsx")', function () {
+            csInterface.evalScript("ClientPdfHost.getDocInfo()", handleDocInfoResponse);
+          });
+          return;
+        }
+        handleDocInfoResponse(res);
+      } catch (err) {
+        docTitle.innerText = "Ready";
+        docMeta.innerText = "Click Refresh after opening document";
+      }
+    });
+  }
+
+  function handleDocInfoResponse(res) {
+    try {
+      var data = typeof res === "string" ? JSON.parse(res) : res;
+      if (data && data.hasDoc) {
+        docInfo = data;
+        docTitle.innerText = data.docName || "Active Document";
+        docMeta.innerText = (data.colorSpace || "RGB") + " Document";
+        badgeArtboards.innerText = (data.artboardCount || 1) + " Page" + (data.artboardCount > 1 ? "s" : "");
+        badgeArtboards.style.display = "inline-block";
+
+        if (!txtOutputDir.value || txtOutputDir.value.trim() === "" || txtOutputDir.value.indexOf("Desktop") !== -1) {
+          txtOutputDir.value = data.docPath;
+        }
+        if (!txtPdfName.value || txtPdfName.value.trim() === "" || txtPdfName.value === "Client_Preview.pdf") {
+          txtPdfName.value = (data.docName || "Document") + "_Client_Preview.pdf";
+        }
+        btnGenerate.disabled = false;
+      } else {
+        docInfo = null;
+        docTitle.innerText = "No Document Open";
+        docMeta.innerText = "Open a file in Illustrator";
+        badgeArtboards.style.display = "none";
+        btnGenerate.disabled = true;
+      }
+    } catch (e) {
+      docTitle.innerText = "Active";
+      docMeta.innerText = "Illustrator connected";
+      badgeArtboards.style.display = "none";
+      btnGenerate.disabled = false;
+    }
+  }
+
+  btnRefresh.addEventListener("click", refreshDocInfo);
+
+  // Auto-refresh when document activates
+  try {
+    csInterface.addEventListener("documentAfterActivate", refreshDocInfo);
+    csInterface.addEventListener("documentAfterDeactivate", refreshDocInfo);
+    csInterface.addEventListener("documentAfterSave", refreshDocInfo);
+  } catch (e) {}
+
+  // 6. Browse Destination Folder
+  btnBrowseDir.addEventListener("click", function () {
+    var cur = (txtOutputDir.value || "").replace(/\\/g, "\\\\");
+    csInterface.evalScript('ClientPdfHost.selectFolder("' + cur + '")', function (res) {
+      if (res && res !== "null" && res !== "") {
+        txtOutputDir.value = res;
+      }
+    });
+  });
+
+  // 7. Generate Action
+  btnGenerate.addEventListener("click", function () {
+    hideResult();
+    setLoading(true, "Exporting " + currentScale + "% flattened pages...");
+
+    var isTransparent = false;
+    var pngRadios = document.getElementsByName("pngBg");
+    for (var i = 0; i < pngRadios.length; i++) {
+      if (pngRadios[i].checked && pngRadios[i].value === "transparent") {
+        isTransparent = true;
+      }
+    }
+
+    var config = {
+      scaleMultiplier: currentScale,
+      format: currentFormat,
+      transparent: isTransparent,
+      artboardMode: abModeAll.checked ? "all" : "range",
+      artboardRange: txtArtboardRange.value,
+      outputDir: txtOutputDir.value,
+      pdfFileName: txtPdfName.value,
+      openPdf: chkOpenPdf.checked,
+      autoClean: chkAutoClean.checked
+    };
+
+    var configStr = JSON.stringify(config).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+
+    csInterface.evalScript('ClientPdfHost.generatePdf("' + configStr + '")', function (res) {
+      setLoading(false);
+      try {
+        var data = JSON.parse(res);
+        if (data && data.success) {
+          lastPdfPath = data.pdfPath;
+          showResult(true, "🎉 PDF Created! (" + data.pageCount + " pages @ " + data.resolution + ")");
+        } else {
+          showResult(false, "❌ Error: " + (data.error || "Failed to generate PDF."));
+        }
+      } catch (err) {
+        showResult(false, "❌ " + (res || "Could not complete operation."));
+      }
+    });
+  });
+
+  // 8. Open Result File Link
+  linkOpenResult.addEventListener("click", function () {
+    if (lastPdfPath) {
+      var escPath = lastPdfPath.replace(/\\/g, "\\\\");
+      csInterface.evalScript('new File("' + escPath + '").execute()');
+    }
+  });
+
+  function setLoading(isLoading, text) {
+    if (isLoading) {
+      btnGenerate.disabled = true;
+      progressContainer.style.display = "block";
+      progressText.innerText = text || "Working...";
+    } else {
+      btnGenerate.disabled = false;
+      progressContainer.style.display = "none";
+    }
+  }
+
+  function showResult(isSuccess, message) {
+    resultBox.style.display = "block";
+    resultBox.className = "result-box" + (isSuccess ? "" : " error");
+    resultMessage.innerText = message;
+    linkOpenResult.style.display = isSuccess ? "inline" : "none";
+  }
+
+  function hideResult() {
+    resultBox.style.display = "none";
+  }
+
+  // Initial Check
+  refreshDocInfo();
+});
