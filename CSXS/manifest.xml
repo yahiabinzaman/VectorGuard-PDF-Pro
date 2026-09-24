@@ -34,23 +34,23 @@
                     <Menu>VectorGuard PDF Pro</Menu>
                     <Geometry>
                         <Size>
-                            <Height>580</Height>
-                            <Width>360</Width>
+                            <Height>490</Height>
+                            <Width>330</Width>
                         </Size>
                         <MinSize>
-                            <Height>450</Height>
-                            <Width>320</Width>
+                            <Height>360</Height>
+                            <Width>260</Width>
                         </MinSize>
                         <MaxSize>
-                            <Height>900</Height>
-                            <Width>500</Width>
+                            <Height>950</Height>
+                            <Width>550</Width>
                         </MaxSize>
                     </Geometry>
                     <Icons>
                         <Icon Type="Normal">./icons/iconNormal.png</Icon>
                         <Icon Type="RollOver">./icons/iconRollover.png</Icon>
                         <Icon Type="DarkNormal">./icons/iconDarkNormal.png</Icon>
-                        <Icon Type="DarkRollOver">./icons/iconDarkRollover.png</Icon>
+                        <Icon Type="DarkRollover">./icons/iconDarkRollover.png</Icon>
                     </Icons>
                 </UI>
             </DispatchInfo>
