@@ -1,4 +1,4 @@
-/* Adobe Illustrator Native Dark UI Design System with Futuristic Laser Engine */
+/* Adobe Illustrator Native Dark UI Design System with Permanent Cyber Status Bar */
 :root {
   --adobe-bg: #2b2b2b;
   --adobe-panel-bg: #323232;
@@ -373,20 +373,31 @@ html, body {
 }
 
 /* ==============================================================================
-   FUTURISTIC CYBER PROGRESS WIDGET
+   PERMANENT FUTURISTIC CYBER PROGRESS ENGINE
    ============================================================================== */
 .cyber-progress-widget {
-  display: none;
-  background: linear-gradient(135deg, #131722 0%, #0d1117 100%);
-  border: 1px solid rgba(0, 242, 254, 0.3);
+  display: block; /* Always visible for futuristic cyber monitor look */
+  background: linear-gradient(135deg, #10141e 0%, #0b0e14 100%);
+  border: 1px solid rgba(0, 242, 254, 0.25);
   border-radius: var(--adobe-radius);
   padding: 5px 7px;
   margin-top: 3px;
   margin-bottom: 2px;
-  box-shadow: inset 0 0 10px rgba(0, 242, 254, 0.08), 0 2px 6px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 10px rgba(0, 242, 254, 0.06), 0 1px 4px rgba(0, 0, 0, 0.35);
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.cyber-progress-widget.running {
+  border-color: rgba(0, 242, 254, 0.5);
+  box-shadow: inset 0 0 12px rgba(0, 242, 254, 0.15), 0 0 8px rgba(0, 242, 254, 0.2);
+}
+
+.cyber-progress-widget.success {
+  border-color: rgba(0, 255, 135, 0.5);
+  box-shadow: inset 0 0 12px rgba(0, 255, 135, 0.12), 0 0 8px rgba(0, 255, 135, 0.2);
 }
 
 .cyber-progress-widget::before {
@@ -397,8 +408,8 @@ html, body {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 242, 254, 0.03) 2px,
-    rgba(0, 242, 254, 0.03) 4px
+    rgba(0, 242, 254, 0.02) 2px,
+    rgba(0, 242, 254, 0.02) 4px
   );
   pointer-events: none;
 }
@@ -425,6 +436,18 @@ html, body {
   animation: cyber-blink 0.9s infinite alternate ease-in-out;
 }
 
+.cyber-pulse-dot.idle {
+  background: #64b5f6;
+  box-shadow: 0 0 4px rgba(100, 181, 246, 0.5);
+  animation: none;
+}
+
+.cyber-pulse-dot.success {
+  background: var(--cyber-green);
+  box-shadow: var(--cyber-green-glow);
+  animation: none;
+}
+
 @keyframes cyber-blink {
   0% { opacity: 0.4; transform: scale(0.85); }
   100% { opacity: 1; transform: scale(1.15); }
@@ -446,7 +469,7 @@ html, body {
   color: #ffffff;
   background: rgba(0, 242, 254, 0.15);
   border: 1px solid rgba(0, 242, 254, 0.4);
-  padding: 0px 3px;
+  padding: 0px 4px;
   border-radius: 2px;
 }
 
@@ -463,12 +486,12 @@ html, body {
 
 .cyber-fill {
   height: 100%;
-  width: 0%;
+  width: 100%;
   background: linear-gradient(90deg, #00f2fe 0%, #4facfe 50%, #00c6ff 100%);
   border-radius: 2px;
   box-shadow: var(--cyber-glow);
   position: relative;
-  transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cyber-fill::after {

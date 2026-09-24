@@ -146,6 +146,13 @@ document.addEventListener("DOMContentLoaded", function () {
         badgeArtboards.style.display = "inline-block";
         if (statusDot) statusDot.className = "doc-status-indicator";
 
+        // Update Cyber Progress Status to Standby Ready
+        progressContainer.className = "cyber-progress-widget";
+        progressFill.style.width = "100%";
+        progressPct.innerText = "READY";
+        progressStatusText.innerText = "PIPELINE READY";
+        progressSubText.innerText = "> " + data.artboardCount + " ARTBOARD" + (data.artboardCount > 1 ? "S" : "") + " DETECTED • STANDBY";
+
         if (!txtOutputDir.value || txtOutputDir.value.trim() === "" || txtOutputDir.value.indexOf("Desktop") !== -1) {
           txtOutputDir.value = data.docPath;
         }
@@ -159,6 +166,13 @@ document.addEventListener("DOMContentLoaded", function () {
         docMeta.innerText = "Please open a file in Illustrator";
         badgeArtboards.style.display = "none";
         if (statusDot) statusDot.className = "doc-status-indicator inactive";
+
+        progressContainer.className = "cyber-progress-widget";
+        progressFill.style.width = "0%";
+        progressPct.innerText = "STANDBY";
+        progressStatusText.innerText = "STANDBY";
+        progressSubText.innerText = "> WAITING FOR ACTIVE AI PROJECT FILE...";
+
         btnGenerate.disabled = true;
       }
     } catch (e) {
@@ -192,12 +206,12 @@ document.addEventListener("DOMContentLoaded", function () {
     hideResult();
     var isTurbo = chkTurbo ? chkTurbo.checked : true;
 
-    // Show futuristic progress bar right above CTA Button
-    progressContainer.style.display = "block";
-    progressFill.style.width = "45%";
-    progressPct.innerText = "RUNNING";
+    // Activate Live Cyber Laser Progress Bar
+    progressContainer.className = "cyber-progress-widget running";
+    progressFill.style.width = "75%";
+    progressPct.innerText = "ACTIVE";
     progressStatusText.innerText = isTurbo ? "TURBO PIPELINE" : "PROCESSING";
-    progressSubText.innerText = "> COMPILING PDF STREAM...";
+    progressSubText.innerText = "> RASTERIZING & COMPILING PDF STREAM...";
     btnGenerate.disabled = true;
 
     var isTransparent = false;
@@ -226,17 +240,30 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(function () {
       csInterface.evalScript('ClientPdfHost.generatePdf("' + configStr + '")', function (res) {
         btnGenerate.disabled = false;
-        progressContainer.style.display = "none";
         try {
           var data = JSON.parse(res);
           if (data && data.success) {
             lastPdfPath = data.pdfPath;
             lastFolderPath = data.folderPath || txtOutputDir.value;
+            
+            // Set Cyber Progress Bar to Success State
+            progressContainer.className = "cyber-progress-widget success";
+            progressFill.style.width = "100%";
+            progressPct.innerText = "100%";
+            progressStatusText.innerText = "COMPILED";
+            progressSubText.innerText = "> SUCCESS • " + data.pageCount + " PAGES FLATTENED & SAVED";
+
             showResult(true, "PDF Created Successfully (" + data.pageCount + " pages @ " + data.resolution + ")");
           } else {
+            progressContainer.className = "cyber-progress-widget";
+            progressFill.style.width = "0%";
+            progressPct.innerText = "ERROR";
+            progressStatusText.innerText = "FAILED";
+            progressSubText.innerText = "> " + (data.error || "Execution error.");
             showResult(false, "Error: " + (data.error || "Failed to generate PDF."));
           }
         } catch (err) {
+          progressContainer.className = "cyber-progress-widget";
           showResult(false, "Error: " + (res || "Could not complete operation."));
         }
       });
