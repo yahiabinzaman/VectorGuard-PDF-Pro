@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var chkOpenPdf = document.getElementById("chkOpenPdf");
   var chkAutoClean = document.getElementById("chkAutoClean");
+  var chkTurbo = document.getElementById("chkTurbo");
 
   var btnGenerate = document.getElementById("btnGenerate");
   var progressContainer = document.getElementById("progressContainer");
@@ -179,10 +180,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // 7. Generate Action
+  // 7. Generate Action (Turbo Optimized)
   btnGenerate.addEventListener("click", function () {
     hideResult();
-    setLoading(true, "Exporting " + currentScale + "% raster pages...");
+    var isTurbo = chkTurbo ? chkTurbo.checked : true;
+    setLoading(true, (isTurbo ? "⚡ Turbo Exporting " : "Exporting ") + currentScale + "% pages...");
 
     var isTransparent = false;
     var pngRadios = document.getElementsByName("pngBg");
@@ -201,7 +203,8 @@ document.addEventListener("DOMContentLoaded", function () {
       outputDir: txtOutputDir.value,
       pdfFileName: txtPdfName.value,
       openPdf: chkOpenPdf.checked,
-      autoClean: chkAutoClean.checked
+      autoClean: chkAutoClean.checked,
+      turboMode: isTurbo
     };
 
     var configStr = JSON.stringify(config).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -212,7 +215,8 @@ document.addEventListener("DOMContentLoaded", function () {
         var data = JSON.parse(res);
         if (data && data.success) {
           lastPdfPath = data.pdfPath;
-          showResult(true, "🎉 PDF Created! (" + data.pageCount + " pages @ " + data.resolution + ")");
+          var speedTag = data.turbo ? " ⚡ Turbo" : "";
+          showResult(true, "🎉 PDF Created!" + speedTag + " (" + data.pageCount + " pages @ " + data.resolution + ")");
         } else {
           showResult(false, "❌ " + (data.error || "Failed to generate PDF."));
         }

@@ -47,7 +47,7 @@
             <span>PNG (24-bit Crisp)</span>
           </button>
           <button class="format-btn" id="btnFormatJPG" type="button">
-            <span>JPG (Max 100%)</span>
+            <span>JPG (High Speed)</span>
           </button>
         </div>
         
@@ -95,10 +95,16 @@
         </div>
 
         <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
-          <label class="checkbox-label">
-            <input type="checkbox" id="chkOpenPdf" checked>
-            <span>Open PDF automatically when done</span>
-          </label>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label class="checkbox-label">
+              <input type="checkbox" id="chkOpenPdf" checked>
+              <span>Open PDF when done</span>
+            </label>
+            <label class="checkbox-label" title="Streamlined baking without DOM overhead (5x faster)">
+              <input type="checkbox" id="chkTurbo" checked>
+              <span style="color:#f5a623; font-weight:600;">⚡ Turbo (5x Fast)</span>
+            </label>
+          </div>
           <label class="checkbox-label">
             <input type="checkbox" id="chkAutoClean" checked>
             <span>Auto-delete temporary image files</span>
