@@ -1,4 +1,4 @@
-/* Adobe Illustrator Native Dark UI Design System */
+/* Adobe Illustrator Native Dark UI Design System with Futuristic Laser Engine */
 :root {
   --adobe-bg: #2b2b2b;
   --adobe-panel-bg: #323232;
@@ -18,6 +18,14 @@
   --adobe-btn-active: #242424;
   --adobe-border: #343434;
   --adobe-radius: 3px;
+
+  /* Futuristic Cyber Tokens */
+  --cyber-cyan: #00f2fe;
+  --cyber-blue: #4facfe;
+  --cyber-glow: 0 0 8px rgba(0, 242, 254, 0.6), 0 0 16px rgba(79, 172, 254, 0.3);
+  --cyber-green: #00ff87;
+  --cyber-green-glow: 0 0 8px rgba(0, 255, 135, 0.6);
+  --cyber-red: #ff3366;
 }
 
 * {
@@ -178,7 +186,7 @@ html, body {
   color: var(--adobe-text-dim);
 }
 
-/* Native Adobe Segmented Controls / Chips */
+/* Segmented Controls / Chips */
 .chip-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr) 58px;
@@ -329,7 +337,7 @@ html, body {
   color: #ffffff;
 }
 
-/* Primary Native Action Button (Adobe CC Blue) */
+/* Primary Native Action Button */
 .btn-primary {
   width: 100%;
   background: var(--adobe-primary-btn);
@@ -364,64 +372,152 @@ html, body {
   cursor: not-allowed;
 }
 
-/* Progress Container */
-.progress-container {
+/* ==============================================================================
+   FUTURISTIC CYBER PROGRESS ENGINE
+   ============================================================================== */
+.cyber-progress-widget {
   display: none;
-  margin-top: 4px;
-  background: var(--adobe-group-bg);
-  border: 1px solid var(--adobe-border);
+  background: linear-gradient(135deg, #131722 0%, #0d1117 100%);
+  border: 1px solid rgba(0, 242, 254, 0.3);
   border-radius: var(--adobe-radius);
   padding: 6px 8px;
+  margin-top: 3px;
+  box-shadow: inset 0 0 12px rgba(0, 242, 254, 0.08), 0 2px 8px rgba(0, 0, 0, 0.4);
   flex-shrink: 0;
-}
-
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  font-size: 9.5px;
-  color: var(--adobe-text-muted);
-  margin-bottom: 4px;
-}
-
-.progress-bar-bg {
-  width: 100%;
-  height: 4px;
-  background: #1c1c1c;
-  border-radius: 2px;
+  position: relative;
   overflow: hidden;
 }
 
-.progress-bar-fill {
-  height: 100%;
-  width: 100%;
-  background: #1473e6;
-  border-radius: 2px;
-  animation: pulse-bar 1.2s infinite ease-in-out;
+/* Cyber Scanning Grid overlay */
+.cyber-progress-widget::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 242, 254, 0.03) 2px,
+    rgba(0, 242, 254, 0.03) 4px
+  );
+  pointer-events: none;
 }
 
-@keyframes pulse-bar {
-  0% { opacity: 0.5; }
-  50% { opacity: 1; }
-  100% { opacity: 0.5; }
+.cyber-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.cyber-status-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cyber-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyber-cyan);
+  box-shadow: var(--cyber-glow);
+  animation: cyber-blink 1s infinite alternate ease-in-out;
+}
+
+@keyframes cyber-blink {
+  0% { opacity: 0.4; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1.15); }
+}
+
+.cyber-status-text {
+  font-family: "SF Mono", "Consolas", "Courier New", monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--cyber-cyan);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.cyber-pct-badge {
+  font-family: "SF Mono", "Consolas", "Courier New", monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(0, 242, 254, 0.15);
+  border: 1px solid rgba(0, 242, 254, 0.4);
+  padding: 0px 4px;
+  border-radius: 2px;
+}
+
+/* Laser Beam Track */
+.cyber-track {
+  width: 100%;
+  height: 5px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 242, 254, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.cyber-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00f2fe 0%, #4facfe 50%, #00c6ff 100%);
+  border-radius: 2px;
+  box-shadow: var(--cyber-glow);
+  position: relative;
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Shimmer beam passing through the progress bar */
+.cyber-fill::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.7) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: laser-sweep 1.2s infinite linear;
+}
+
+@keyframes laser-sweep {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.cyber-subtext {
+  font-family: "SF Mono", "Consolas", "Courier New", monospace;
+  font-size: 8.5px;
+  color: var(--adobe-text-muted);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Result Box */
 .result-box {
   display: none;
-  margin-top: 4px;
-  padding: 5px 8px;
+  margin-top: 3px;
+  padding: 5px 7px;
   border-radius: var(--adobe-radius);
-  background: rgba(46, 160, 67, 0.15);
-  border: 1px solid rgba(46, 160, 67, 0.4);
-  color: #3fb950;
+  background: rgba(0, 255, 135, 0.1);
+  border: 1px solid rgba(0, 255, 135, 0.35);
+  color: var(--cyber-green);
   font-size: 10px;
   flex-shrink: 0;
 }
 
 .result-box.error {
-  background: rgba(248, 81, 73, 0.15);
-  border-color: rgba(248, 81, 73, 0.4);
-  color: #f85149;
+  background: rgba(255, 51, 102, 0.1);
+  border-color: rgba(255, 51, 102, 0.35);
+  color: var(--cyber-red);
 }
 
 .result-actions {
@@ -432,6 +528,7 @@ html, body {
   color: #ffffff;
   text-decoration: underline;
   cursor: pointer;
+  font-weight: 500;
 }
 
 /* Fixed Footer */

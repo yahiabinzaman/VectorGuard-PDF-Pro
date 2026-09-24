@@ -29,8 +29,13 @@ document.addEventListener("DOMContentLoaded", function () {
   var chkTurbo = document.getElementById("chkTurbo");
 
   var btnGenerate = document.getElementById("btnGenerate");
+
+  // Futuristic Progress Elements
   var progressContainer = document.getElementById("progressContainer");
-  var progressText = document.getElementById("progressText");
+  var progressStatusText = document.getElementById("progressStatusText");
+  var progressPct = document.getElementById("progressPct");
+  var progressFill = document.getElementById("progressFill");
+  var progressSubText = document.getElementById("progressSubText");
 
   var resultBox = document.getElementById("resultBox");
   var resultMessage = document.getElementById("resultMessage");
@@ -42,6 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var currentFormat = "PNG";
   var lastPdfPath = "";
   var docInfo = null;
+  var progressInterval = null;
 
   // 1. Scale Chip Selection
   chips.forEach(function (chip) {
@@ -180,11 +186,61 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // 7. Generate Action
+  // 7. Futuristic Progress Animation Engine
+  function startCyberProgress(totalSteps) {
+    if (progressInterval) clearInterval(progressInterval);
+    progressContainer.style.display = "block";
+    progressFill.style.width = "5%";
+    progressPct.innerText = "5%";
+    progressStatusText.innerText = "TURBO ENGINE ACTIVE";
+    progressSubText.innerText = "> INITIALIZING PARALLEL RASTERIZER...";
+
+    var currentPct = 5;
+    var stages = [
+      { at: 20, text: "> BATCH RASTERIZING ARTBOARDS (" + currentScale + "%)..." },
+      { at: 45, text: "> MAPPING 1:1 COORDINATES TO NEW CANVAS..." },
+      { at: 70, text: "> COMPILING UN-EDITABLE PDF STREAM..." },
+      { at: 90, text: "> PURGING TEMPORARY IMAGE CACHE..." }
+    ];
+
+    progressInterval = setInterval(function () {
+      if (currentPct < 92) {
+        var increment = Math.max(1, Math.floor((92 - currentPct) / 8));
+        currentPct += increment;
+        progressFill.style.width = currentPct + "%";
+        progressPct.innerText = currentPct + "%";
+
+        for (var i = 0; i < stages.length; i++) {
+          if (currentPct >= stages[i].at) {
+            progressSubText.innerText = stages[i].text;
+          }
+        }
+      }
+    }, 120);
+  }
+
+  function finishCyberProgress(isSuccess) {
+    if (progressInterval) clearInterval(progressInterval);
+    if (isSuccess) {
+      progressFill.style.width = "100%";
+      progressPct.innerText = "100%";
+      progressStatusText.innerText = "COMPLETED";
+      progressSubText.innerText = "> CLIENT PDF STREAM READY";
+      setTimeout(function () {
+        progressContainer.style.display = "none";
+      }, 1500);
+    } else {
+      progressContainer.style.display = "none";
+    }
+  }
+
+  // 8. Generate Action
   btnGenerate.addEventListener("click", function () {
     hideResult();
     var isTurbo = chkTurbo ? chkTurbo.checked : true;
-    setLoading(true, "Exporting " + currentScale + "% pages...");
+    
+    btnGenerate.disabled = true;
+    startCyberProgress();
 
     var isTransparent = false;
     var pngRadios = document.getElementsByName("pngBg");
@@ -210,39 +266,31 @@ document.addEventListener("DOMContentLoaded", function () {
     var configStr = JSON.stringify(config).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
     csInterface.evalScript('ClientPdfHost.generatePdf("' + configStr + '")', function (res) {
-      setLoading(false);
+      btnGenerate.disabled = false;
       try {
         var data = JSON.parse(res);
         if (data && data.success) {
+          finishCyberProgress(true);
           lastPdfPath = data.pdfPath;
           showResult(true, "PDF Created Successfully (" + data.pageCount + " pages @ " + data.resolution + ")");
         } else {
+          finishCyberProgress(false);
           showResult(false, "Error: " + (data.error || "Failed to generate PDF."));
         }
       } catch (err) {
+        finishCyberProgress(false);
         showResult(false, "Error: " + (res || "Could not complete operation."));
       }
     });
   });
 
-  // 8. Open Result File Link
+  // 9. Open Result File Link
   linkOpenResult.addEventListener("click", function () {
     if (lastPdfPath) {
       var escPath = lastPdfPath.replace(/\\/g, "\\\\");
       csInterface.evalScript('new File("' + escPath + '").execute()');
     }
   });
-
-  function setLoading(isLoading, text) {
-    if (isLoading) {
-      btnGenerate.disabled = true;
-      progressContainer.style.display = "block";
-      progressText.innerText = text || "Processing...";
-    } else {
-      btnGenerate.disabled = false;
-      progressContainer.style.display = "none";
-    }
-  }
 
   function showResult(isSuccess, message) {
     resultBox.style.display = "block";

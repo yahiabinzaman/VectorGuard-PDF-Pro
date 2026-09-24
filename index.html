@@ -117,14 +117,19 @@
         <span>Create Client PDF</span>
       </button>
 
-      <!-- Progress State -->
-      <div class="progress-container" id="progressContainer">
-        <div class="progress-header">
-          <span id="progressText">Processing artboards...</span>
+      <!-- Futuristic Cyber Progress Widget -->
+      <div class="cyber-progress-widget" id="progressContainer">
+        <div class="cyber-header">
+          <div class="cyber-status-group">
+            <div class="cyber-pulse-dot"></div>
+            <span class="cyber-status-text" id="progressStatusText">PROCESSING ENGINE</span>
+          </div>
+          <span class="cyber-pct-badge" id="progressPct">0%</span>
         </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill"></div>
+        <div class="cyber-track">
+          <div class="cyber-fill" id="progressFill"></div>
         </div>
+        <div class="cyber-subtext" id="progressSubText">> INITIALIZING RASTER PIPELINE...</div>
       </div>
 
       <!-- Result Banner -->
