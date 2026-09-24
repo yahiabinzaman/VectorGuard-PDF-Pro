@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var btnGenerate = document.getElementById("btnGenerate");
 
-  // Futuristic Progress Elements
+  // Futuristic Cyber Progress Elements
   var progressContainer = document.getElementById("progressContainer");
   var progressStatusText = document.getElementById("progressStatusText");
   var progressPct = document.getElementById("progressPct");
@@ -47,7 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
   var currentFormat = "PNG";
   var lastPdfPath = "";
   var docInfo = null;
-  var progressInterval = null;
 
   // 1. Scale Chip Selection
   chips.forEach(function (chip) {
@@ -186,61 +185,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // 7. Futuristic Progress Animation Engine
-  function startCyberProgress(totalSteps) {
-    if (progressInterval) clearInterval(progressInterval);
-    progressContainer.style.display = "block";
-    progressFill.style.width = "5%";
-    progressPct.innerText = "5%";
-    progressStatusText.innerText = "TURBO ENGINE ACTIVE";
-    progressSubText.innerText = "> INITIALIZING PARALLEL RASTERIZER...";
-
-    var currentPct = 5;
-    var stages = [
-      { at: 20, text: "> BATCH RASTERIZING ARTBOARDS (" + currentScale + "%)..." },
-      { at: 45, text: "> MAPPING 1:1 COORDINATES TO NEW CANVAS..." },
-      { at: 70, text: "> COMPILING UN-EDITABLE PDF STREAM..." },
-      { at: 90, text: "> PURGING TEMPORARY IMAGE CACHE..." }
-    ];
-
-    progressInterval = setInterval(function () {
-      if (currentPct < 92) {
-        var increment = Math.max(1, Math.floor((92 - currentPct) / 8));
-        currentPct += increment;
-        progressFill.style.width = currentPct + "%";
-        progressPct.innerText = currentPct + "%";
-
-        for (var i = 0; i < stages.length; i++) {
-          if (currentPct >= stages[i].at) {
-            progressSubText.innerText = stages[i].text;
-          }
-        }
-      }
-    }, 120);
-  }
-
-  function finishCyberProgress(isSuccess) {
-    if (progressInterval) clearInterval(progressInterval);
-    if (isSuccess) {
-      progressFill.style.width = "100%";
-      progressPct.innerText = "100%";
-      progressStatusText.innerText = "COMPLETED";
-      progressSubText.innerText = "> CLIENT PDF STREAM READY";
-      setTimeout(function () {
-        progressContainer.style.display = "none";
-      }, 1500);
-    } else {
-      progressContainer.style.display = "none";
-    }
-  }
-
-  // 8. Generate Action
+  // 7. Non-blocking Asynchronous Execution Trigger
   btnGenerate.addEventListener("click", function () {
     hideResult();
     var isTurbo = chkTurbo ? chkTurbo.checked : true;
-    
+
+    // Show futuristic progress bar immediately
+    progressContainer.style.display = "block";
+    progressFill.style.width = "40%";
+    progressPct.innerText = "RUNNING";
+    progressStatusText.innerText = isTurbo ? "TURBO ENGINE" : "PROCESSING";
+    progressSubText.innerText = "> PIPELINE INITIALIZED...";
     btnGenerate.disabled = true;
-    startCyberProgress();
 
     var isTransparent = false;
     var pngRadios = document.getElementsByName("pngBg");
@@ -265,26 +221,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var configStr = JSON.stringify(config).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
-    csInterface.evalScript('ClientPdfHost.generatePdf("' + configStr + '")', function (res) {
-      btnGenerate.disabled = false;
-      try {
-        var data = JSON.parse(res);
-        if (data && data.success) {
-          finishCyberProgress(true);
-          lastPdfPath = data.pdfPath;
-          showResult(true, "PDF Created Successfully (" + data.pageCount + " pages @ " + data.resolution + ")");
-        } else {
-          finishCyberProgress(false);
-          showResult(false, "Error: " + (data.error || "Failed to generate PDF."));
+    // Asynchronous dispatch so browser renders before ExtendScript locks main thread
+    setTimeout(function () {
+      csInterface.evalScript('ClientPdfHost.generatePdf("' + configStr + '")', function (res) {
+        btnGenerate.disabled = false;
+        progressContainer.style.display = "none";
+        try {
+          var data = JSON.parse(res);
+          if (data && data.success) {
+            lastPdfPath = data.pdfPath;
+            showResult(true, "PDF Created Successfully (" + data.pageCount + " pages @ " + data.resolution + ")");
+          } else {
+            showResult(false, "Error: " + (data.error || "Failed to generate PDF."));
+          }
+        } catch (err) {
+          showResult(false, "Error: " + (res || "Could not complete operation."));
         }
-      } catch (err) {
-        finishCyberProgress(false);
-        showResult(false, "Error: " + (res || "Could not complete operation."));
-      }
-    });
+      });
+    }, 60);
   });
 
-  // 9. Open Result File Link
+  // 8. Open Result File Link
   linkOpenResult.addEventListener("click", function () {
     if (lastPdfPath) {
       var escPath = lastPdfPath.replace(/\\/g, "\\\\");
