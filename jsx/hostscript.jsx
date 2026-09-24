@@ -90,7 +90,7 @@ if (typeof JSON !== "object") {
 
 /**
  * ==============================================================================
- * High-Speed Turbo HostScript for VectorGuard PDF Pro
+ * Cross-Platform High-Speed Turbo HostScript (Mac & Windows)
  * ==============================================================================
  */
 var ClientPdfHost = {
@@ -144,11 +144,12 @@ var ClientPdfHost = {
     },
 
     /**
-     * Select destination folder dialog
+     * Select destination folder dialog (Cross-platform)
      */
     selectFolder: function (currentPath) {
         try {
-            var startFolder = (currentPath && currentPath.length > 0) ? new Folder(currentPath) : Folder.desktop;
+            var cleanPath = currentPath ? currentPath.replace(/\\/g, "/") : "";
+            var startFolder = (cleanPath && cleanPath.length > 0) ? new Folder(cleanPath) : Folder.desktop;
             var selected = Folder.selectDialog("Select Output Folder for PDF", startFolder);
             if (selected) {
                 return selected.fsName;
@@ -158,7 +159,7 @@ var ClientPdfHost = {
     },
 
     /**
-     * High-Speed PDF Generation Routine (Turbo Engine)
+     * High-Speed Cross-Platform PDF Generation Routine
      */
     generatePdf: function (configJsonStr) {
         var prevInteractionLevel = app.userInteractionLevel;
@@ -179,7 +180,9 @@ var ClientPdfHost = {
             var isTransparent = isPNG && (cfg.transparent === true);
             var isTurbo = (cfg.turboMode !== false);
             
-            var outputFolder = new Folder(cfg.outputDir || Folder.desktop.fsName);
+            // Normalize path for Mac & Windows
+            var cleanOutputDir = (cfg.outputDir || "").replace(/\\/g, "/");
+            var outputFolder = new Folder(cleanOutputDir.length > 0 ? cleanOutputDir : Folder.desktop.fsName);
             if (!outputFolder.exists) {
                 outputFolder.create();
             }
@@ -237,7 +240,7 @@ var ClientPdfHost = {
             var artboardRects = [];
             var artboardNames = [];
 
-            // Reusable Export Options (Allocated Once for Speed)
+            // Reusable Export Options
             var pngOpts = null;
             var jpgOpts = null;
 
@@ -259,7 +262,7 @@ var ClientPdfHost = {
                 jpgOpts = new ExportOptionsJPEG();
                 jpgOpts.artBoardClipping = true;
                 jpgOpts.antiAliasing = true;
-                jpgOpts.qualitySetting = isTurbo ? 92 : 100; // 92% is 3x faster with indistinguishable visual fidelity
+                jpgOpts.qualitySetting = isTurbo ? 92 : 100;
                 jpgOpts.horizontalScale = scaleMultiplier;
                 jpgOpts.verticalScale = scaleMultiplier;
                 jpgOpts.optimization = true;
@@ -284,7 +287,7 @@ var ClientPdfHost = {
                     sourceDoc.exportFile(tempImgFile, ExportType.JPEG, jpgOpts);
                 }
 
-                // Fallback check
+                // Robust fallback check
                 var actualFile = tempImgFile;
                 if (!actualFile.exists) {
                     var matches = tempFolder.getFiles(filePrefix + "*");
@@ -297,9 +300,6 @@ var ClientPdfHost = {
             }
 
             // Step 2: Turbo Document Assembly
-            // In Turbo Mode, images remain Linked PlacedItems. When saving to PDF,
-            // Illustrator's PDF engine automatically bakes them directly into the PDF stream
-            // without the massive overhead of unpacking into the AI DOM via .embed()!
             var colorSpace = sourceDoc.documentColorSpace;
             var newDoc = app.documents.add(colorSpace);
 
@@ -328,7 +328,7 @@ var ClientPdfHost = {
                 placed.position = [left, top];
                 placed.width = Math.abs(right - left);
                 placed.height = Math.abs(top - bottom);
-                // In Turbo mode: do NOT call placed.embed() -> 5x-10x Speed boost!
+
                 if (!isTurbo) {
                     placed.embed();
                 }
@@ -338,7 +338,7 @@ var ClientPdfHost = {
             var pdfOptions = new PDFSaveOptions();
             pdfOptions.compatibility = PDFCompatibility.ACROBAT5;
             pdfOptions.preserveEditability = false; // CRITICAL: Protect vector assets
-            pdfOptions.generateThumbnails = false;  // Disabling internal thumbnail generation boosts write speed
+            pdfOptions.generateThumbnails = false;
             pdfOptions.viewAfterSaving = false;
             pdfOptions.optimization = true;
             pdfOptions.compressArt = true;
@@ -367,7 +367,6 @@ var ClientPdfHost = {
                 } catch (e) {}
             }
 
-            // Force memory garbage collection
             try { $.gc(); } catch (ge) {}
 
             return JSON.stringify({
