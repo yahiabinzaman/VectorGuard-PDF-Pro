@@ -9,10 +9,10 @@
 <body>
 
   <div class="app-wrapper">
-    <!-- Main Content -->
+    <!-- Main Content Area -->
     <div class="main-content">
 
-      <!-- Compact Active Document Status Strip -->
+      <!-- Document Status Bar -->
       <div class="doc-card" id="docCard">
         <div class="doc-status-indicator" id="statusDot"></div>
         <div class="doc-info">
@@ -20,16 +20,16 @@
             <span class="doc-title" id="docTitle">Checking Document...</span>
             <span class="badge-artboards" id="badgeArtboards" style="display:none;">0 Pages</span>
           </div>
-          <span class="doc-meta" id="docMeta">Detecting Illustrator File...</span>
+          <span class="doc-meta" id="docMeta">Detecting active file...</span>
         </div>
-        <button class="btn-refresh" id="btnRefresh" title="Refresh Active Document">↻</button>
+        <button class="btn-refresh" id="btnRefresh" title="Refresh Document Info">Refresh</button>
       </div>
 
       <!-- Resolution / Scale Settings -->
       <div class="section-panel">
         <div class="section-label">
           <span>Resolution / Scale</span>
-          <span class="sub-hint">2x is recommended</span>
+          <span class="sub-hint">2x recommended</span>
         </div>
         <div class="chip-grid">
           <div class="chip" data-scale="100">1x (100%)</div>
@@ -41,13 +41,13 @@
 
       <!-- Format Settings -->
       <div class="section-panel">
-        <div class="section-label">Image Raster Format</div>
+        <div class="section-label">Raster Format</div>
         <div class="format-toggle">
           <button class="format-btn active" id="btnFormatPNG" type="button">
-            <span>PNG (24-bit Crisp)</span>
+            <span>PNG (24-bit)</span>
           </button>
           <button class="format-btn" id="btnFormatJPG" type="button">
-            <span>JPG (High Speed)</span>
+            <span>JPEG (High Quality)</span>
           </button>
         </div>
         
@@ -74,7 +74,7 @@
           </label>
           <label class="checkbox-label">
             <input type="radio" name="artboardMode" value="range" id="abModeRange">
-            <span>Specific Pages</span>
+            <span>Range</span>
           </label>
         </div>
         <div class="input-group" id="rangeInputGroup" style="display: none;">
@@ -98,30 +98,29 @@
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <label class="checkbox-label">
               <input type="checkbox" id="chkOpenPdf" checked>
-              <span>Open PDF when done</span>
+              <span>Open PDF when finished</span>
             </label>
-            <label class="checkbox-label" title="Streamlined baking without DOM overhead (5x faster)">
+            <label class="checkbox-label" title="Fast linked baking without DOM overhead">
               <input type="checkbox" id="chkTurbo" checked>
-              <span style="color:#f5a623; font-weight:600;">⚡ Turbo (5x Fast)</span>
+              <span style="color:#58a6ff; font-weight:500;">Turbo Mode</span>
             </label>
           </div>
           <label class="checkbox-label">
             <input type="checkbox" id="chkAutoClean" checked>
-            <span>Auto-delete temporary image files</span>
+            <span>Delete temporary files</span>
           </label>
         </div>
       </div>
 
       <!-- Primary Action Button -->
       <button class="btn-primary" id="btnGenerate">
-        <span>🚀 Create Client PDF</span>
+        <span>Create Client PDF</span>
       </button>
 
       <!-- Progress State -->
       <div class="progress-container" id="progressContainer">
         <div class="progress-header">
-          <span id="progressText">Processing artboards & creating PDF...</span>
-          <span>⚡</span>
+          <span id="progressText">Processing artboards...</span>
         </div>
         <div class="progress-bar-bg">
           <div class="progress-bar-fill"></div>
@@ -130,7 +129,7 @@
 
       <!-- Result Banner -->
       <div class="result-box" id="resultBox">
-        <div id="resultMessage">PDF Created Successfully!</div>
+        <div id="resultMessage">PDF Created Successfully</div>
         <div class="result-actions">
           <span class="result-link" id="linkOpenResult">Open File</span>
         </div>

@@ -1,22 +1,23 @@
-/* Adobe Native Dark UI Design System - Pro Edition */
+/* Adobe Illustrator Native Dark UI Design System */
 :root {
   --adobe-bg: #2b2b2b;
   --adobe-panel-bg: #323232;
-  --adobe-group-bg: #242424;
-  --adobe-input-bg: #1c1c1c;
-  --adobe-input-border: #3c3c3c;
-  --adobe-input-focus: #4787f7;
-  --adobe-text-main: #e6e6e6;
-  --adobe-text-muted: #9e9e9e;
-  --adobe-text-dim: #707070;
-  --adobe-accent: #e04836;
-  --adobe-accent-gradient: linear-gradient(180deg, #e34d3b 0%, #bd2c1e 100%);
-  --adobe-btn-bg: #363636;
+  --adobe-group-bg: #232323;
+  --adobe-input-bg: #1a1a1a;
+  --adobe-input-border: #3b3b3b;
+  --adobe-input-focus: #1473e6;
+  --adobe-text-main: #dedede;
+  --adobe-text-muted: #9c9c9c;
+  --adobe-text-dim: #6e6e6e;
+  --adobe-primary-btn: #1473e6;
+  --adobe-primary-btn-hover: #0d66d0;
+  --adobe-primary-btn-active: #095aba;
+  --adobe-btn-bg: #353535;
   --adobe-btn-border: #444444;
   --adobe-btn-hover: #404040;
-  --adobe-btn-active: #222222;
-  --adobe-border: #353535;
-  --adobe-radius: 4px;
+  --adobe-btn-active: #242424;
+  --adobe-border: #343434;
+  --adobe-radius: 3px;
 }
 
 * {
@@ -67,7 +68,7 @@ html, body {
   border-radius: 2px;
 }
 
-/* Status Indicator Dot */
+/* Document Status Card */
 .doc-card {
   background: var(--adobe-group-bg);
   border: 1px solid var(--adobe-border);
@@ -75,22 +76,22 @@ html, body {
   padding: 5px 7px;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .doc-status-indicator {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #30d158;
-  box-shadow: 0 0 6px rgba(48, 209, 88, 0.6);
+  background: #2dd4bf;
+  box-shadow: 0 0 4px rgba(45, 212, 191, 0.5);
   flex-shrink: 0;
 }
 
 .doc-status-indicator.inactive {
-  background: #ff453a;
-  box-shadow: 0 0 6px rgba(255, 69, 58, 0.4);
+  background: #f87171;
+  box-shadow: 0 0 4px rgba(248, 113, 113, 0.4);
 }
 
 .doc-info {
@@ -129,7 +130,7 @@ html, body {
   border-radius: 2px;
   font-size: 9px;
   font-weight: 600;
-  border: 1px solid rgba(100, 181, 246, 0.35);
+  border: 1px solid rgba(100, 181, 246, 0.3);
   white-space: nowrap;
 }
 
@@ -138,14 +139,11 @@ html, body {
   border: 1px solid var(--adobe-btn-border);
   color: var(--adobe-text-main);
   border-radius: var(--adobe-radius);
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 2px 6px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 10px;
   flex-shrink: 0;
+  transition: all 0.1s ease;
 }
 .btn-refresh:hover {
   background: var(--adobe-btn-hover);
@@ -180,7 +178,7 @@ html, body {
   color: var(--adobe-text-dim);
 }
 
-/* Compact Chips */
+/* Native Adobe Segmented Controls / Chips */
 .chip-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr) 58px;
@@ -198,6 +196,7 @@ html, body {
   text-align: center;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.1s ease;
 }
 
 .chip:hover {
@@ -206,8 +205,8 @@ html, body {
 }
 
 .chip.active {
-  background: #334b63;
-  border-color: #4787f7;
+  background: #1473e6;
+  border-color: #1473e6;
   color: #ffffff;
   font-weight: 600;
 }
@@ -227,7 +226,7 @@ html, body {
   border-color: var(--adobe-input-focus);
 }
 
-/* Compact Format Segmented Buttons */
+/* Format Segmented Buttons */
 .format-toggle {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -247,6 +246,7 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.1s ease;
 }
 
 .format-btn:hover {
@@ -255,8 +255,8 @@ html, body {
 }
 
 .format-btn.active {
-  background: #334b63;
-  border-color: #4787f7;
+  background: #1473e6;
+  border-color: #1473e6;
   color: #ffffff;
   font-weight: 600;
 }
@@ -283,7 +283,7 @@ html, body {
 
 .checkbox-label input[type="checkbox"],
 .checkbox-label input[type="radio"] {
-  accent-color: #4787f7;
+  accent-color: #1473e6;
   cursor: pointer;
   margin: 0;
 }
@@ -329,11 +329,11 @@ html, body {
   color: #ffffff;
 }
 
-/* Primary Action Button */
+/* Primary Native Action Button (Adobe CC Blue) */
 .btn-primary {
   width: 100%;
-  background: var(--adobe-accent-gradient);
-  border: 1px solid #c43224;
+  background: var(--adobe-primary-btn);
+  border: 1px solid #1160c2;
   color: #ffffff;
   padding: 7px 8px;
   border-radius: var(--adobe-radius);
@@ -345,22 +345,22 @@ html, body {
   justify-content: center;
   gap: 5px;
   margin-top: 2px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   flex-shrink: 0;
   transition: all 0.1s ease;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(180deg, #ea5543 0%, #c93326 100%);
-  border-color: #d83a2c;
+  background: var(--adobe-primary-btn-hover);
+  border-color: #0b55b0;
 }
 
 .btn-primary:active {
-  background: #ab2518;
+  background: var(--adobe-primary-btn-active);
 }
 
 .btn-primary:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -394,7 +394,7 @@ html, body {
 .progress-bar-fill {
   height: 100%;
   width: 100%;
-  background: var(--adobe-accent-gradient);
+  background: #1473e6;
   border-radius: 2px;
   animation: pulse-bar 1.2s infinite ease-in-out;
 }
@@ -470,12 +470,12 @@ html, body {
 }
 
 .dev-credit .dev-name {
-  color: #4787f7;
-  font-weight: 600;
+  color: #58a6ff;
+  font-weight: 500;
 }
 
 .dev-credit:hover .dev-name {
-  color: #6ea4f9;
+  color: #79c0ff;
   text-decoration: underline;
 }
 

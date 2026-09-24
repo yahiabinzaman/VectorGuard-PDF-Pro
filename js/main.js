@@ -149,14 +149,14 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         docInfo = null;
         docTitle.innerText = "No Document Open";
-        docMeta.innerText = "Please open a project file in Illustrator";
+        docMeta.innerText = "Please open a file in Illustrator";
         badgeArtboards.style.display = "none";
         if (statusDot) statusDot.className = "doc-status-indicator inactive";
         btnGenerate.disabled = true;
       }
     } catch (e) {
-      docTitle.innerText = "Illustrator Active";
-      docMeta.innerText = "Click ↻ to detect open file";
+      docTitle.innerText = "Ready";
+      docMeta.innerText = "Click Refresh to detect active document";
       badgeArtboards.style.display = "none";
       btnGenerate.disabled = false;
     }
@@ -180,11 +180,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // 7. Generate Action (Turbo Optimized)
+  // 7. Generate Action
   btnGenerate.addEventListener("click", function () {
     hideResult();
     var isTurbo = chkTurbo ? chkTurbo.checked : true;
-    setLoading(true, (isTurbo ? "⚡ Turbo Exporting " : "Exporting ") + currentScale + "% pages...");
+    setLoading(true, "Exporting " + currentScale + "% pages...");
 
     var isTransparent = false;
     var pngRadios = document.getElementsByName("pngBg");
@@ -215,13 +215,12 @@ document.addEventListener("DOMContentLoaded", function () {
         var data = JSON.parse(res);
         if (data && data.success) {
           lastPdfPath = data.pdfPath;
-          var speedTag = data.turbo ? " ⚡ Turbo" : "";
-          showResult(true, "🎉 PDF Created!" + speedTag + " (" + data.pageCount + " pages @ " + data.resolution + ")");
+          showResult(true, "PDF Created Successfully (" + data.pageCount + " pages @ " + data.resolution + ")");
         } else {
-          showResult(false, "❌ " + (data.error || "Failed to generate PDF."));
+          showResult(false, "Error: " + (data.error || "Failed to generate PDF."));
         }
       } catch (err) {
-        showResult(false, "❌ " + (res || "Could not complete operation."));
+        showResult(false, "Error: " + (res || "Could not complete operation."));
       }
     });
   });
