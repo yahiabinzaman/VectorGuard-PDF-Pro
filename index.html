@@ -96,9 +96,9 @@
 
         <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label class="checkbox-label">
-              <input type="checkbox" id="chkOpenPdf" checked>
-              <span>Open PDF when finished</span>
+            <label class="checkbox-label" title="Automatically opens destination folder when PDF is created">
+              <input type="checkbox" id="chkRevealFolder" checked>
+              <span>Show in Folder when done</span>
             </label>
             <label class="checkbox-label" title="Fast linked baking without DOM overhead">
               <input type="checkbox" id="chkTurbo" checked>
@@ -112,31 +112,32 @@
         </div>
       </div>
 
-      <!-- Primary Action Button -->
-      <button class="btn-primary" id="btnGenerate">
-        <span>Create Client PDF</span>
-      </button>
-
-      <!-- Futuristic Cyber Progress Widget -->
+      <!-- Integrated Futuristic Progress Widget (Positioned right above CTA Button) -->
       <div class="cyber-progress-widget" id="progressContainer">
         <div class="cyber-header">
           <div class="cyber-status-group">
             <div class="cyber-pulse-dot"></div>
-            <span class="cyber-status-text" id="progressStatusText">PROCESSING ENGINE</span>
+            <span class="cyber-status-text" id="progressStatusText">PIPELINE RUNNING</span>
           </div>
           <span class="cyber-pct-badge" id="progressPct">0%</span>
         </div>
         <div class="cyber-track">
           <div class="cyber-fill" id="progressFill"></div>
         </div>
-        <div class="cyber-subtext" id="progressSubText">> INITIALIZING RASTER PIPELINE...</div>
+        <div class="cyber-subtext" id="progressSubText">> COMPILING PDF STREAM...</div>
       </div>
 
-      <!-- Result Banner -->
+      <!-- Primary Action Button -->
+      <button class="btn-primary" id="btnGenerate">
+        <span>Create Client PDF</span>
+      </button>
+
+      <!-- Result Banner with Folder & File Reveal Actions -->
       <div class="result-box" id="resultBox">
         <div id="resultMessage">PDF Created Successfully</div>
         <div class="result-actions">
-          <span class="result-link" id="linkOpenResult">Open File</span>
+          <button class="action-btn-link highlight" id="btnRevealFolder" type="button">Show in Folder</button>
+          <button class="action-btn-link" id="linkOpenResult" type="button">Open File</button>
         </div>
       </div>
 

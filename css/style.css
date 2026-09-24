@@ -373,22 +373,22 @@ html, body {
 }
 
 /* ==============================================================================
-   FUTURISTIC CYBER PROGRESS ENGINE
+   FUTURISTIC CYBER PROGRESS WIDGET
    ============================================================================== */
 .cyber-progress-widget {
   display: none;
   background: linear-gradient(135deg, #131722 0%, #0d1117 100%);
   border: 1px solid rgba(0, 242, 254, 0.3);
   border-radius: var(--adobe-radius);
-  padding: 6px 8px;
+  padding: 5px 7px;
   margin-top: 3px;
-  box-shadow: inset 0 0 12px rgba(0, 242, 254, 0.08), 0 2px 8px rgba(0, 0, 0, 0.4);
+  margin-bottom: 2px;
+  box-shadow: inset 0 0 10px rgba(0, 242, 254, 0.08), 0 2px 6px rgba(0, 0, 0, 0.35);
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
 }
 
-/* Cyber Scanning Grid overlay */
 .cyber-progress-widget::before {
   content: "";
   position: absolute;
@@ -407,7 +407,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .cyber-status-group {
@@ -417,12 +417,12 @@ html, body {
 }
 
 .cyber-pulse-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--cyber-cyan);
   box-shadow: var(--cyber-glow);
-  animation: cyber-blink 1s infinite alternate ease-in-out;
+  animation: cyber-blink 0.9s infinite alternate ease-in-out;
 }
 
 @keyframes cyber-blink {
@@ -432,28 +432,28 @@ html, body {
 
 .cyber-status-text {
   font-family: "SF Mono", "Consolas", "Courier New", monospace;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 600;
   color: var(--cyber-cyan);
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
 }
 
 .cyber-pct-badge {
   font-family: "SF Mono", "Consolas", "Courier New", monospace;
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 700;
   color: #ffffff;
   background: rgba(0, 242, 254, 0.15);
   border: 1px solid rgba(0, 242, 254, 0.4);
-  padding: 0px 4px;
+  padding: 0px 3px;
   border-radius: 2px;
 }
 
-/* Laser Beam Track */
+/* Laser Track */
 .cyber-track {
   width: 100%;
-  height: 5px;
+  height: 4px;
   background: rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(0, 242, 254, 0.2);
   border-radius: 2px;
@@ -468,10 +468,9 @@ html, body {
   border-radius: 2px;
   box-shadow: var(--cyber-glow);
   position: relative;
-  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Shimmer beam passing through the progress bar */
 .cyber-fill::after {
   content: "";
   position: absolute;
@@ -483,7 +482,7 @@ html, body {
     transparent 100%
   );
   background-size: 200% 100%;
-  animation: laser-sweep 1.2s infinite linear;
+  animation: laser-sweep 1s infinite linear;
 }
 
 @keyframes laser-sweep {
@@ -493,9 +492,9 @@ html, body {
 
 .cyber-subtext {
   font-family: "SF Mono", "Consolas", "Courier New", monospace;
-  font-size: 8.5px;
+  font-size: 8px;
   color: var(--adobe-text-muted);
-  margin-top: 4px;
+  margin-top: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -507,28 +506,50 @@ html, body {
   margin-top: 3px;
   padding: 5px 7px;
   border-radius: var(--adobe-radius);
-  background: rgba(0, 255, 135, 0.1);
-  border: 1px solid rgba(0, 255, 135, 0.35);
-  color: var(--cyber-green);
+  background: rgba(46, 160, 67, 0.12);
+  border: 1px solid rgba(46, 160, 67, 0.35);
+  color: #3fb950;
   font-size: 10px;
   flex-shrink: 0;
 }
 
 .result-box.error {
-  background: rgba(255, 51, 102, 0.1);
-  border-color: rgba(255, 51, 102, 0.35);
-  color: var(--cyber-red);
+  background: rgba(248, 81, 73, 0.12);
+  border-color: rgba(248, 81, 73, 0.35);
+  color: #f85149;
 }
 
 .result-actions {
-  margin-top: 3px;
+  margin-top: 4px;
+  display: flex;
+  gap: 6px;
 }
 
-.result-link {
+.action-btn-link {
+  background: var(--adobe-btn-bg);
+  border: 1px solid var(--adobe-btn-border);
   color: #ffffff;
-  text-decoration: underline;
-  cursor: pointer;
+  border-radius: var(--adobe-radius);
+  padding: 2px 7px;
+  font-size: 9.5px;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.action-btn-link:hover {
+  background: var(--adobe-btn-hover);
+}
+
+.action-btn-link.highlight {
+  background: #1b3a5b;
+  border-color: #58a6ff;
+  color: #64b5f6;
+}
+
+.action-btn-link.highlight:hover {
+  background: #254e7a;
+  color: #ffffff;
 }
 
 /* Fixed Footer */

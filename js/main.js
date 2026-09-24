@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var btnBrowseDir = document.getElementById("btnBrowseDir");
   var txtPdfName = document.getElementById("txtPdfName");
 
-  var chkOpenPdf = document.getElementById("chkOpenPdf");
+  var chkRevealFolder = document.getElementById("chkRevealFolder");
   var chkAutoClean = document.getElementById("chkAutoClean");
   var chkTurbo = document.getElementById("chkTurbo");
 
@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var resultBox = document.getElementById("resultBox");
   var resultMessage = document.getElementById("resultMessage");
+  var btnRevealFolder = document.getElementById("btnRevealFolder");
   var linkOpenResult = document.getElementById("linkOpenResult");
   var linkGithub = document.getElementById("linkGithub");
 
@@ -46,6 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var currentScale = 200;
   var currentFormat = "PNG";
   var lastPdfPath = "";
+  var lastFolderPath = "";
   var docInfo = null;
 
   // 1. Scale Chip Selection
@@ -190,12 +192,12 @@ document.addEventListener("DOMContentLoaded", function () {
     hideResult();
     var isTurbo = chkTurbo ? chkTurbo.checked : true;
 
-    // Show futuristic progress bar immediately
+    // Show futuristic progress bar right above CTA Button
     progressContainer.style.display = "block";
-    progressFill.style.width = "40%";
+    progressFill.style.width = "45%";
     progressPct.innerText = "RUNNING";
-    progressStatusText.innerText = isTurbo ? "TURBO ENGINE" : "PROCESSING";
-    progressSubText.innerText = "> PIPELINE INITIALIZED...";
+    progressStatusText.innerText = isTurbo ? "TURBO PIPELINE" : "PROCESSING";
+    progressSubText.innerText = "> COMPILING PDF STREAM...";
     btnGenerate.disabled = true;
 
     var isTransparent = false;
@@ -214,14 +216,13 @@ document.addEventListener("DOMContentLoaded", function () {
       artboardRange: txtArtboardRange.value,
       outputDir: txtOutputDir.value,
       pdfFileName: txtPdfName.value,
-      openPdf: chkOpenPdf.checked,
+      revealFolder: chkRevealFolder ? chkRevealFolder.checked : true,
       autoClean: chkAutoClean.checked,
       turboMode: isTurbo
     };
 
     var configStr = JSON.stringify(config).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
-    // Asynchronous dispatch so browser renders before ExtendScript locks main thread
     setTimeout(function () {
       csInterface.evalScript('ClientPdfHost.generatePdf("' + configStr + '")', function (res) {
         btnGenerate.disabled = false;
@@ -230,6 +231,7 @@ document.addEventListener("DOMContentLoaded", function () {
           var data = JSON.parse(res);
           if (data && data.success) {
             lastPdfPath = data.pdfPath;
+            lastFolderPath = data.folderPath || txtOutputDir.value;
             showResult(true, "PDF Created Successfully (" + data.pageCount + " pages @ " + data.resolution + ")");
           } else {
             showResult(false, "Error: " + (data.error || "Failed to generate PDF."));
@@ -241,19 +243,33 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 60);
   });
 
-  // 8. Open Result File Link
-  linkOpenResult.addEventListener("click", function () {
-    if (lastPdfPath) {
-      var escPath = lastPdfPath.replace(/\\/g, "\\\\");
-      csInterface.evalScript('new File("' + escPath + '").execute()');
-    }
-  });
+  // 8. Reveal Folder Action (Opens Finder on Mac or File Explorer on Windows)
+  if (btnRevealFolder) {
+    btnRevealFolder.addEventListener("click", function () {
+      var target = lastPdfPath || lastFolderPath || txtOutputDir.value;
+      if (target) {
+        var escPath = target.replace(/\\/g, "\\\\");
+        csInterface.evalScript('ClientPdfHost.revealFolder("' + escPath + '")');
+      }
+    });
+  }
+
+  // 9. Open PDF File Action
+  if (linkOpenResult) {
+    linkOpenResult.addEventListener("click", function () {
+      if (lastPdfPath) {
+        var escPath = lastPdfPath.replace(/\\/g, "\\\\");
+        csInterface.evalScript('new File("' + escPath + '").execute()');
+      }
+    });
+  }
 
   function showResult(isSuccess, message) {
     resultBox.style.display = "block";
     resultBox.className = "result-box" + (isSuccess ? "" : " error");
     resultMessage.innerText = message;
-    linkOpenResult.style.display = isSuccess ? "inline" : "none";
+    if (btnRevealFolder) btnRevealFolder.style.display = isSuccess ? "inline-block" : "none";
+    if (linkOpenResult) linkOpenResult.style.display = isSuccess ? "inline-block" : "none";
   }
 
   function hideResult() {

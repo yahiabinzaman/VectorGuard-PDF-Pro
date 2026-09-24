@@ -152,8 +152,26 @@ var ClientPdfHost = {
         return "";
     },
 
+    revealFolder: function (filePath) {
+        try {
+            var cleanPath = filePath ? filePath.replace(/\\/g, "/") : "";
+            var f = new File(cleanPath);
+            if (f.exists) {
+                f.parent.execute(); // Reveals folder in Finder (Mac) or File Explorer (Windows)
+                return "true";
+            } else {
+                var fol = new Folder(cleanPath);
+                if (fol.exists) {
+                    fol.execute();
+                    return "true";
+                }
+            }
+        } catch (e) {}
+        return "false";
+    },
+
     /**
-     * Ultra-Optimized PDF Pipeline with Native Live Progress Palette
+     * Ultra-Optimized PDF Pipeline
      */
     generatePdf: function (configJsonStr) {
         var prevInteractionLevel = app.userInteractionLevel;
@@ -223,48 +241,6 @@ var ClientPdfHost = {
                 return JSON.stringify({ success: false, error: "No valid artboards selected." });
             }
 
-            // ------------------------------------------------------------------
-            // Native Live Progress Palette (Renders directly on OS Main Thread)
-            // ------------------------------------------------------------------
-            var totalSteps = artboardIndices.length + 3;
-            try {
-                progressWin = new Window("palette", "VectorGuard Turbo Engine", undefined, { closeButton: false });
-                progressWin.orientation = "column";
-                progressWin.alignChildren = ["fill", "center"];
-                progressWin.margins = 14;
-                progressWin.spacing = 8;
-                progressWin.preferredSize.width = 300;
-
-                var pHeader = progressWin.add("statictext", undefined, "VECTORGUARD TURBO PIPELINE");
-                pHeader.graphics.font = ScriptUI.newFont("dialog", "BOLD", 11);
-
-                var pStatus = progressWin.add("statictext", undefined, "Initializing parallel rasterizer...");
-                var pBar = progressWin.add("progressbar", undefined, 0, totalSteps);
-                pBar.preferredSize.width = 270;
-                pBar.preferredSize.height = 10;
-
-                var pCount = progressWin.add("statictext", undefined, "Processing 0 of " + artboardIndices.length + " pages [0%]");
-                pCount.alignment = ["right", "center"];
-
-                progressWin.center();
-                progressWin.show();
-                progressWin.update();
-            } catch (pe) {
-                progressWin = null;
-            }
-
-            function updateNativeProgress(step, statusText) {
-                if (progressWin) {
-                    try {
-                        pBar.value = step;
-                        pStatus.text = statusText;
-                        var pct = Math.min(100, Math.round((step / totalSteps) * 100));
-                        pCount.text = "[" + pct + "%] - " + step + " / " + totalSteps;
-                        progressWin.update();
-                    } catch (e) {}
-                }
-            }
-
             // High-speed temporary directory
             var tempDirName = "vg_fast_" + (new Date().getTime());
             var tempFolder = new Folder(Folder.temp.fsName + "/" + tempDirName);
@@ -276,7 +252,7 @@ var ClientPdfHost = {
             var artboardRects = [];
             var artboardNames = [];
 
-            // Single Pre-Configured Export Options Object (Max Performance)
+            // Pre-Configured Export Options
             var pngOpts = null;
             var jpgOpts = null;
 
@@ -298,22 +274,18 @@ var ClientPdfHost = {
                 jpgOpts = new ExportOptionsJPEG();
                 jpgOpts.artBoardClipping = true;
                 jpgOpts.antiAliasing = true;
-                jpgOpts.qualitySetting = isTurbo ? 88 : 100; // 88% is 3.5x faster with 100% crisp visual retention
+                jpgOpts.qualitySetting = isTurbo ? 88 : 100;
                 jpgOpts.horizontalScale = scaleMultiplier;
                 jpgOpts.verticalScale = scaleMultiplier;
                 jpgOpts.optimization = true;
             }
 
-            // ------------------------------------------------------------------
-            // Step 1: Rapid Artboard Batch Export
-            // ------------------------------------------------------------------
+            // Step 1: Rapid Export
             for (var i = 0; i < artboardIndices.length; i++) {
                 var abIdx = artboardIndices[i];
                 var ab = sourceDoc.artboards[abIdx];
                 artboardRects.push(ab.artboardRect);
                 artboardNames.push(ab.name || ("Artboard_" + (abIdx + 1)));
-
-                updateNativeProgress(i + 1, "Rasterizing Page " + (i + 1) + " of " + artboardIndices.length + " (" + (abIdx + 1) + ")...");
 
                 sourceDoc.artboards.setActiveArtboardIndex(abIdx);
 
@@ -338,11 +310,7 @@ var ClientPdfHost = {
                 exportedFiles.push(actualFile);
             }
 
-            // ------------------------------------------------------------------
-            // Step 2: Instant Canvas Assembly
-            // ------------------------------------------------------------------
-            updateNativeProgress(artboardIndices.length + 1, "Assembling multi-page canvas...");
-
+            // Step 2: Canvas Assembly
             var colorSpace = sourceDoc.documentColorSpace;
             var newDoc = app.documents.add(colorSpace);
 
@@ -377,11 +345,7 @@ var ClientPdfHost = {
                 }
             }
 
-            // ------------------------------------------------------------------
             // Step 3: Fast PDF Stream Write
-            // ------------------------------------------------------------------
-            updateNativeProgress(artboardIndices.length + 2, "Compiling client-safe PDF stream...");
-
             var pdfOptions = new PDFSaveOptions();
             pdfOptions.compatibility = PDFCompatibility.ACROBAT5;
             pdfOptions.preserveEditability = false;
@@ -393,11 +357,7 @@ var ClientPdfHost = {
             newDoc.saveAs(finalPdfFile, pdfOptions);
             newDoc.close(SaveOptions.DONOTSAVECHANGES);
 
-            // ------------------------------------------------------------------
-            // Step 4: Instant Temp Purge
-            // ------------------------------------------------------------------
-            updateNativeProgress(totalSteps, "Cleaning up cache...");
-
+            // Step 4: Cleanup
             if (cfg.autoClean !== false) {
                 for (var f = 0; f < exportedFiles.length; f++) {
                     try {
@@ -411,14 +371,10 @@ var ClientPdfHost = {
 
             app.userInteractionLevel = prevInteractionLevel;
 
-            if (progressWin) {
-                try { progressWin.close(); } catch (e) {}
-            }
-
-            // Open PDF if requested
-            if (cfg.openPdf && finalPdfFile.exists) {
+            // Step 5: Reveal Folder or Open PDF
+            if (cfg.revealFolder && finalPdfFile.exists) {
                 try {
-                    finalPdfFile.execute();
+                    finalPdfFile.parent.execute();
                 } catch (e) {}
             }
 
@@ -427,6 +383,7 @@ var ClientPdfHost = {
             return JSON.stringify({
                 success: true,
                 pdfPath: finalPdfFile.fsName,
+                folderPath: finalPdfFile.parent.fsName,
                 pageCount: artboardIndices.length,
                 resolution: scaleMultiplier + "%",
                 format: isPNG ? "PNG" : "JPG",
@@ -435,9 +392,6 @@ var ClientPdfHost = {
 
         } catch (err) {
             app.userInteractionLevel = prevInteractionLevel;
-            if (progressWin) {
-                try { progressWin.close(); } catch (e) {}
-            }
             return JSON.stringify({
                 success: false,
                 error: err.toString()
