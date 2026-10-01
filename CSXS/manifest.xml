@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.colorlab.vectorguardpdf" ExtensionBundleVersion="1.0.0"
+<ExtensionManifest Version="6.0" ExtensionBundleId="com.colorlab.vectorguardpdf" ExtensionBundleVersion="1.0.0"
     ExtensionBundleName="VectorGuard PDF Pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ExtensionList>
         <Extension Id="com.colorlab.vectorguardpdf.panel" Version="1.0.0" />
     </ExtensionList>
     <ExecutionEnvironment>
         <HostList>
-            <!-- Adobe Illustrator Support -->
+            <!-- Adobe Illustrator Support (CS6 through CC 2026+) -->
             <Host Name="ILST" Version="[16.0,99.9]" />
         </HostList>
         <LocaleList>
             <Locale Code="All" />
         </LocaleList>
         <RequiredRuntimeList>
-            <RequiredRuntime Name="CSXS" Version="7.0" />
+            <RequiredRuntime Name="CSXS" Version="6.0" />
         </RequiredRuntimeList>
     </ExecutionEnvironment>
     <DispatchInfoList>
@@ -22,6 +22,14 @@
                 <Resources>
                     <MainPath>./index.html</MainPath>
                     <ScriptPath>./jsx/hostscript.jsx</ScriptPath>
+                    <CEPEngineList>
+                        <CEPEngine Id="NodeEngine">
+                            <CommandLine>
+                                <Parameter>--enable-nodejs</Parameter>
+                                <Parameter>--mixed-context</Parameter>
+                            </CommandLine>
+                        </CEPEngine>
+                    </CEPEngineList>
                     <CEPEngineRefs>
                         <CEPEngineRef Id="NodeEngine" />
                     </CEPEngineRefs>
@@ -57,3 +65,4 @@
         </Extension>
     </DispatchInfoList>
 </ExtensionManifest>
+

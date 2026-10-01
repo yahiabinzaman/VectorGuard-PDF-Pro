@@ -269,7 +269,7 @@ var ClientPdfHost = {
                 }
                 pngOpts.horizontalScale = scaleMultiplier;
                 pngOpts.verticalScale = scaleMultiplier;
-                pngOpts.saveAsHTML = false;
+                try { pngOpts.saveAsHTML = false; } catch (e) {}
             } else {
                 jpgOpts = new ExportOptionsJPEG();
                 jpgOpts.artBoardClipping = true;
@@ -277,7 +277,7 @@ var ClientPdfHost = {
                 jpgOpts.qualitySetting = isTurbo ? 88 : 100;
                 jpgOpts.horizontalScale = scaleMultiplier;
                 jpgOpts.verticalScale = scaleMultiplier;
-                jpgOpts.optimization = true;
+                try { jpgOpts.optimization = true; } catch (e) {}
             }
 
             // Step 1: Rapid Export

@@ -123,7 +123,9 @@ document.addEventListener("DOMContentLoaded", function () {
     csInterface.evalScript("ClientPdfHost.getDocInfo()", function (res) {
       try {
         if (!res || res === "EvalScript error." || res === "undefined") {
-          csInterface.evalScript('$.evalFile("' + csInterface.getSystemPath(SystemPath.EXTENSION) + '/jsx/hostscript.jsx")', function () {
+          var extPath = (csInterface.getSystemPath(SystemPath.EXTENSION) || "").replace(/\\/g, "/");
+          var loadCmd = extPath ? '$.evalFile("' + extPath + '/jsx/hostscript.jsx")' : '$.evalFile(new File($.fileName).parent + "/hostscript.jsx")';
+          csInterface.evalScript(loadCmd, function () {
             csInterface.evalScript("ClientPdfHost.getDocInfo()", handleDocInfoResponse);
           });
           return;

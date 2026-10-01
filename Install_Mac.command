@@ -8,8 +8,8 @@ echo "==========================================================================
 echo ""
 
 # 1. Enable PlayerDebugMode for all CSXS versions
-echo "[1/3] Enabling Adobe CEP Debug Mode (CSXS 7 - 18)..."
-for v in {7..18}; do
+echo "[1/3] Enabling Adobe CEP Debug Mode (CSXS 4 - 24)..."
+for v in {4..24}; do
     defaults write com.adobe.CSXS.$v PlayerDebugMode 1 2>/dev/null
 done
 echo "      [OK] Debug mode enabled."
