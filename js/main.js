@@ -61,6 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var lastPdfPath = "";
   var lastFolderPath = "";
   var docInfo = null;
+  var lastDocName = "";
 
   // Security & Watermark Handlers
   if (chkWatermark && watermarkControls) {
@@ -85,7 +86,6 @@ document.addEventListener("DOMContentLoaded", function () {
       currentWatermarkStyle = "center";
     });
   }
-
 
   // 1. Scale Chip Selection
   chips.forEach(function (chip) {
@@ -156,28 +156,31 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // 5. Refresh Active Document Info
-  function refreshDocInfo() {
+  function refreshDocInfo(forceUpdate) {
     csInterface.evalScript("ClientPdfHost.getDocInfo()", function (res) {
       try {
         if (!res || res === "EvalScript error." || res === "undefined") {
           var extPath = (csInterface.getSystemPath(SystemPath.EXTENSION) || "").replace(/\\/g, "/");
           var loadCmd = extPath ? '$.evalFile("' + extPath + '/jsx/hostscript.jsx")' : '$.evalFile(new File($.fileName).parent + "/hostscript.jsx")';
           csInterface.evalScript(loadCmd, function () {
-            csInterface.evalScript("ClientPdfHost.getDocInfo()", handleDocInfoResponse);
+            csInterface.evalScript("ClientPdfHost.getDocInfo()", function (subRes) {
+              handleDocInfoResponse(subRes, forceUpdate);
+            });
           });
           return;
         }
-        handleDocInfoResponse(res);
+        handleDocInfoResponse(res, forceUpdate);
       } catch (err) {
-        handleDocInfoResponse(null);
+        handleDocInfoResponse(null, forceUpdate);
       }
     });
   }
 
-  function handleDocInfoResponse(res) {
+  function handleDocInfoResponse(res, forceUpdate) {
     try {
       var data = typeof res === "string" ? JSON.parse(res) : res;
       if (data && data.hasDoc) {
+        var isNewDoc = (lastDocName !== data.docName);
         docInfo = data;
         docTitle.innerText = data.docName || "Active Document";
         docMeta.innerText = (data.colorSpace || "RGB") + " Document • Ready";
@@ -192,15 +195,20 @@ document.addEventListener("DOMContentLoaded", function () {
         progressStatusText.innerText = "PIPELINE READY";
         progressSubText.innerText = "> " + data.artboardCount + " ARTBOARD" + (data.artboardCount > 1 ? "S" : "") + " DETECTED • STANDBY";
 
-        if (!txtOutputDir.value || txtOutputDir.value.trim() === "" || txtOutputDir.value.indexOf("Desktop") !== -1) {
-          txtOutputDir.value = data.docPath;
-        }
-        if (!txtPdfName.value || txtPdfName.value.trim() === "" || txtPdfName.value === "Client_Preview.pdf") {
+        // DYNAMIC DOCUMENT SYNC: If document changed or user pressed Refresh, sync PDF name and path
+        if (isNewDoc || forceUpdate || !txtPdfName.value || txtPdfName.value.trim() === "" || txtPdfName.value === "Client_Preview.pdf") {
           txtPdfName.value = (data.docName || "Document") + "_Client_Preview.pdf";
+          txtOutputDir.value = data.docPath;
+          if (abModeRange && abModeRange.checked && txtArtboardRange) {
+            txtArtboardRange.value = "1-" + data.artboardCount;
+          }
+          lastDocName = data.docName;
         }
+
         btnGenerate.disabled = false;
       } else {
         docInfo = null;
+        lastDocName = "";
         docTitle.innerText = "No Document Open";
         docMeta.innerText = "Please open a file in Illustrator";
         badgeArtboards.style.display = "none";
@@ -222,12 +230,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  btnRefresh.addEventListener("click", refreshDocInfo);
+  btnRefresh.addEventListener("click", function () {
+    refreshDocInfo(true);
+  });
+
+  // Focus and document change listeners
+  window.addEventListener("focus", function () {
+    refreshDocInfo(false);
+  });
 
   try {
-    csInterface.addEventListener("documentAfterActivate", refreshDocInfo);
-    csInterface.addEventListener("documentAfterDeactivate", refreshDocInfo);
-    csInterface.addEventListener("documentAfterSave", refreshDocInfo);
+    csInterface.addEventListener("documentAfterActivate", function () { refreshDocInfo(false); });
+    csInterface.addEventListener("documentAfterDeactivate", function () { refreshDocInfo(false); });
+    csInterface.addEventListener("documentAfterSave", function () { refreshDocInfo(false); });
+    csInterface.addEventListener("documentAfterSaveAs", function () { refreshDocInfo(true); });
+    csInterface.addEventListener("documentAfterOpen", function () { refreshDocInfo(true); });
   } catch (e) {}
 
   // 6. Browse Destination Folder
