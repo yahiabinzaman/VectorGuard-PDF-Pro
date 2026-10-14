@@ -335,6 +335,8 @@ var ClientPdfHost = {
                 var top = rect[1];
                 var right = rect[2];
                 var bottom = rect[3];
+                var abWidth = Math.abs(right - left);
+                var abHeight = Math.abs(top - bottom);
 
                 placed.position = [left, top];
                 placed.width = abWidth;
