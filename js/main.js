@@ -28,6 +28,17 @@ document.addEventListener("DOMContentLoaded", function () {
   var chkAutoClean = document.getElementById("chkAutoClean");
   var chkTurbo = document.getElementById("chkTurbo");
 
+  // Security & Watermark Elements
+  var chkWatermark = document.getElementById("chkWatermark");
+  var watermarkControls = document.getElementById("watermarkControls");
+  var txtWatermark = document.getElementById("txtWatermark");
+  var btnWmGrid = document.getElementById("btnWmGrid");
+  var btnWmCenter = document.getElementById("btnWmCenter");
+  var selWmOpacity = document.getElementById("selWmOpacity");
+  var chkAntiTrace = document.getElementById("chkAntiTrace");
+  var chkCopyrightFooter = document.getElementById("chkCopyrightFooter");
+  var chkLockPdf = document.getElementById("chkLockPdf");
+
   var btnGenerate = document.getElementById("btnGenerate");
 
   // Futuristic Cyber Progress Elements
@@ -46,9 +57,35 @@ document.addEventListener("DOMContentLoaded", function () {
   // State
   var currentScale = 200;
   var currentFormat = "PNG";
+  var currentWatermarkStyle = "grid";
   var lastPdfPath = "";
   var lastFolderPath = "";
   var docInfo = null;
+
+  // Security & Watermark Handlers
+  if (chkWatermark && watermarkControls) {
+    chkWatermark.addEventListener("change", function () {
+      if (chkWatermark.checked) {
+        watermarkControls.classList.remove("disabled");
+      } else {
+        watermarkControls.classList.add("disabled");
+      }
+    });
+  }
+
+  if (btnWmGrid && btnWmCenter) {
+    btnWmGrid.addEventListener("click", function () {
+      btnWmGrid.classList.add("active");
+      btnWmCenter.classList.remove("active");
+      currentWatermarkStyle = "grid";
+    });
+    btnWmCenter.addEventListener("click", function () {
+      btnWmCenter.classList.add("active");
+      btnWmGrid.classList.remove("active");
+      currentWatermarkStyle = "center";
+    });
+  }
+
 
   // 1. Scale Chip Selection
   chips.forEach(function (chip) {
@@ -234,7 +271,14 @@ document.addEventListener("DOMContentLoaded", function () {
       pdfFileName: txtPdfName.value,
       revealFolder: chkRevealFolder ? chkRevealFolder.checked : true,
       autoClean: chkAutoClean.checked,
-      turboMode: isTurbo
+      turboMode: isTurbo,
+      enableWatermark: chkWatermark ? chkWatermark.checked : false,
+      watermarkText: txtWatermark ? txtWatermark.value : "PREVIEW ONLY • DO NOT COPY",
+      watermarkStyle: currentWatermarkStyle,
+      watermarkOpacity: selWmOpacity ? parseInt(selWmOpacity.value, 10) : 20,
+      antiTraceGuard: chkAntiTrace ? chkAntiTrace.checked : false,
+      copyrightFooter: chkCopyrightFooter ? chkCopyrightFooter.checked : false,
+      lockPdfPermissions: chkLockPdf ? chkLockPdf.checked : true
     };
 
     var configStr = JSON.stringify(config).replace(/\\/g, "\\\\").replace(/"/g, '\\"');

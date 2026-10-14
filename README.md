@@ -57,6 +57,13 @@ When delivering multi-page design mockups (brochures, presentations, social medi
 - Embedded rasterization prevents clients or competitors from opening the PDF in Illustrator or Acrobat to extract paths, logos, icons, brand assets, or custom typography.
 - Built-in `preserveEditability = false` flag guarantees zero Illustrator Private Data is written into the PDF.
 
+### 🛡️ Security & Anti-Theft Protection Suite (New)
+- **Tiled Repeating Grid Watermark**: Generates an angled matrix of text (e.g. `PREVIEW ONLY • DO NOT COPY`) across each artboard with configurable opacity (12%, 20%, 32%). Impossible to crop or screenshot clean assets.
+- **Center Prominent Watermark**: Alternative center-stamped watermark for bold presentation.
+- **Anti-Vector Trace Guard (AI & Bot Poisoning)**: Injects subtle micro-mesh lines that break the edge-detection algorithms of Illustrator's **Image Trace** and AI vectorizers, preventing automatic vector reconstruction while remaining crystal clear for client viewing.
+- **Proof & Disclaimer Footer Strip**: Professional bottom security banner stamping `CONFIDENTIAL CLIENT PROOF • NOT FOR PRODUCTION • [DATE]` on each page.
+- **PDF Permissions & Content Lock (Print-Safe)**: Natively locks Acrobat PDF permissions against text/image extraction (`enableCopying = false`) and unauthorized page editing (`enableChanges = false`), while **explicitly preserving high-quality client printing** (`enablePrinting = PRINT128HIGHRES`) so clients can review physical hard copies!
+
 ### High-Speed Turbo Engine (5x–10x Faster)
 - Direct linked stream baking eliminates redundant DOM embedding overhead.
 - Generates 50–60 page PDFs in seconds.

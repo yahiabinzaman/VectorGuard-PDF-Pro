@@ -337,11 +337,101 @@ var ClientPdfHost = {
                 var bottom = rect[3];
 
                 placed.position = [left, top];
-                placed.width = Math.abs(right - left);
-                placed.height = Math.abs(top - bottom);
+                placed.width = abWidth;
+                placed.height = abHeight;
 
                 if (!isTurbo) {
                     placed.embed();
+                }
+
+                // --- 1. Anti-Vector Trace Guard (Poisons Image Trace Edge Detectors) ---
+                if (cfg.antiTraceGuard) {
+                    try {
+                        var traceGroup = newDoc.groupItems.add();
+                        traceGroup.opacity = 6;
+                        var lineCount = 8;
+                        var strokeCol = new RGBColor();
+                        strokeCol.red = 130; strokeCol.green = 130; strokeCol.blue = 130;
+                        for (var li = 1; li <= lineCount; li++) {
+                            var pathLine = traceGroup.pathItems.add();
+                            var startX = left + (abWidth / lineCount) * li;
+                            var startY = top;
+                            var endX = left;
+                            var endY = top - (abHeight / lineCount) * li;
+                            pathLine.setEntirePath([[startX, startY], [endX, endY]]);
+                            pathLine.filled = false;
+                            pathLine.stroked = true;
+                            pathLine.strokeWidth = 0.5;
+                            pathLine.strokeColor = strokeCol;
+                        }
+                    } catch (e) {}
+                }
+
+                // --- 2. Watermark Protection (Repeating Grid or Center) ---
+                if (cfg.enableWatermark) {
+                    try {
+                        var wmText = cfg.watermarkText || "PREVIEW ONLY • DO NOT COPY";
+                        var wmOpacity = parseFloat(cfg.watermarkOpacity) || 20;
+                        var wmStyle = cfg.watermarkStyle || "grid";
+                        var wmGroup = newDoc.groupItems.add();
+                        wmGroup.opacity = wmOpacity;
+
+                        var wmColor = new RGBColor();
+                        wmColor.red = 110; wmColor.green = 110; wmColor.blue = 110;
+
+                        if (wmStyle === "center") {
+                            var centerTf = wmGroup.textFrames.add();
+                            centerTf.contents = wmText;
+                            var cFontSize = Math.max(16, Math.min(abWidth, abHeight) / 10);
+                            centerTf.textRange.characterAttributes.size = cFontSize;
+                            centerTf.textRange.characterAttributes.fillColor = wmColor;
+                            centerTf.position = [left + (abWidth - centerTf.width) / 2, top - (abHeight - centerTf.height) / 2];
+                            centerTf.rotate(-35);
+                        } else {
+                            // "grid" Repeating Tiled Grid
+                            var rows = 3;
+                            var cols = 2;
+                            var stepX = abWidth / (cols + 1);
+                            var stepY = abHeight / (rows + 1);
+                            var gFontSize = Math.max(11, Math.min(abWidth, abHeight) / 20);
+
+                            for (var gr = 1; gr <= rows; gr++) {
+                                for (var gc = 1; gc <= cols; gc++) {
+                                    var gTf = wmGroup.textFrames.add();
+                                    gTf.contents = wmText;
+                                    gTf.textRange.characterAttributes.size = gFontSize;
+                                    gTf.textRange.characterAttributes.fillColor = wmColor;
+                                    var gX = left + stepX * gc - (gTf.width / 2);
+                                    var gY = top - stepY * gr + (gTf.height / 2);
+                                    gTf.position = [gX, gY];
+                                    gTf.rotate(-32);
+                                }
+                            }
+                        }
+                    } catch (wmErr) {}
+                }
+
+                // --- 3. Proof & Disclaimer Footer Strip ---
+                if (cfg.copyrightFooter) {
+                    try {
+                        var footerHeight = Math.max(16, Math.min(22, abHeight * 0.04));
+                        var footerRect = newDoc.pathItems.rectangle(bottom + footerHeight, left, abWidth, footerHeight);
+                        var bgFooterCol = new RGBColor();
+                        bgFooterCol.red = 26; bgFooterCol.green = 26; bgFooterCol.blue = 26;
+                        footerRect.fillColor = bgFooterCol;
+                        footerRect.stroked = false;
+                        footerRect.opacity = 88;
+
+                        var footerTf = newDoc.textFrames.add();
+                        var now = new Date();
+                        var dateStr = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
+                        footerTf.contents = "CONFIDENTIAL CLIENT PROOF • NOT FOR PRODUCTION • " + (sourceDoc.name.replace(/\.[^\.]+$/, "")) + " • " + dateStr;
+                        footerTf.textRange.characterAttributes.size = Math.max(6, footerHeight * 0.42);
+                        var textWhite = new RGBColor();
+                        textWhite.red = 230; textWhite.green = 230; textWhite.blue = 230;
+                        footerTf.textRange.characterAttributes.fillColor = textWhite;
+                        footerTf.position = [left + 8, bottom + (footerHeight * 0.72)];
+                    } catch (ftErr) {}
                 }
             }
 
@@ -353,6 +443,24 @@ var ClientPdfHost = {
             pdfOptions.viewAfterSaving = false;
             pdfOptions.optimization = true;
             pdfOptions.compressArt = true;
+
+            // --- 4. PDF Security & Permissions Lock ---
+            // Blocks copying and editing, while keeping printing fully allowed for clients!
+            if (cfg.lockPdfPermissions !== false) {
+                try {
+                    pdfOptions.requirePermissionPassword = true;
+                    pdfOptions.permissionPassword = "VG_" + (new Date().getTime());
+                    pdfOptions.enableCopying = false; // Block text & image extraction
+                    if (typeof PDFChangesAllowedEnum !== "undefined" && PDFChangesAllowedEnum.CHANGE128NONE) {
+                        pdfOptions.enableChanges = PDFChangesAllowedEnum.CHANGE128NONE; // Block edits
+                    }
+                    pdfOptions.enableAddComment = false;
+                    // Client printing is explicitly preserved as high-res print
+                    if (typeof PDFPrintAllowedEnum !== "undefined" && PDFPrintAllowedEnum.PRINT128HIGHRES) {
+                        pdfOptions.enablePrinting = PDFPrintAllowedEnum.PRINT128HIGHRES;
+                    }
+                } catch (secErr) {}
+            }
 
             newDoc.saveAs(finalPdfFile, pdfOptions);
             newDoc.close(SaveOptions.DONOTSAVECHANGES);

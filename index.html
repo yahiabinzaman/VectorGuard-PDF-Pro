@@ -82,6 +82,67 @@
         </div>
       </div>
 
+      <!-- Security & Anti-Theft Protection -->
+      <div class="section-panel security-panel">
+        <div class="section-label" style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="display: flex; align-items: center; gap: 5px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Security & Anti-Theft
+          </span>
+          <span class="security-badge">ENHANCED</span>
+        </div>
+
+        <!-- Watermark Toggle & Options -->
+        <div class="security-row">
+          <label class="checkbox-label" style="font-weight: 600;">
+            <input type="checkbox" id="chkWatermark" checked>
+            <span>Watermark Protection</span>
+          </label>
+        </div>
+
+        <div class="watermark-sub-panel" id="watermarkControls">
+          <div class="input-group">
+            <input type="text" class="input-field" id="txtWatermark" value="PREVIEW ONLY • DO NOT COPY" placeholder="Watermark Text...">
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-top: 4px; align-items: center;">
+            <div style="flex: 1; display: flex; gap: 4px;">
+              <button class="wm-style-btn active" id="btnWmGrid" type="button" title="Repeating Tiled Grid across artboard (Hardest to crop/steal)">Grid</button>
+              <button class="wm-style-btn" id="btnWmCenter" type="button" title="Center prominent watermark">Center</button>
+            </div>
+            <div class="wm-opacity-group">
+              <span style="font-size: 8.5px; color: var(--adobe-text-muted);">Opacity:</span>
+              <select class="select-field" id="selWmOpacity">
+                <option value="12">12% (Light)</option>
+                <option value="20" selected>20% (Medium)</option>
+                <option value="32">32% (Strong)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Advanced Anti-Copy / Anti-Trace Controls -->
+        <div class="security-toggles" style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+          <label class="checkbox-label" title="Poisons automated vectorization and Image Trace bots by injecting subtle micro-mesh lines">
+            <input type="checkbox" id="chkAntiTrace" checked>
+            <span>Anti-Vector Trace Guard <span class="badge-mini">AI Block</span></span>
+          </label>
+
+          <label class="checkbox-label" title="Adds a professional client proof & confidentiality disclaimer strip along bottom margin">
+            <input type="checkbox" id="chkCopyrightFooter" checked>
+            <span>Proof & Disclaimer Footer</span>
+          </label>
+
+          <label class="checkbox-label" title="Blocks text/image copying and PDF editing. Client high-quality printing is fully allowed!">
+            <input type="checkbox" id="chkLockPdf" checked>
+            <span>Lock PDF Permissions <span class="badge-mini-green">Print Safe</span></span>
+          </label>
+        </div>
+      </div>
+
+
       <!-- Output Settings -->
       <div class="section-panel">
         <div class="section-label">Output Destination</div>

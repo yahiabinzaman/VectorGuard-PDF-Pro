@@ -133,6 +133,45 @@
     var txtPdfName = nameRow.add("edittext", undefined, docName + "_Client_Preview.pdf");
     txtPdfName.preferredSize.width = 260;
 
+    // Panel: Security & Anti-Theft Protection
+    var secPanel = dialog.add("panel", undefined, "🛡️ Security & Anti-Theft Protection");
+    secPanel.orientation = "column";
+    secPanel.alignChildren = ["fill", "top"];
+    secPanel.spacing = 6;
+    secPanel.margins = 10;
+
+    var wmRow = secPanel.add("group");
+    wmRow.orientation = "row";
+    wmRow.spacing = 10;
+    var chkWatermark = wmRow.add("checkbox", undefined, "Enable Watermark:");
+    chkWatermark.value = true;
+    var txtWatermark = wmRow.add("edittext", undefined, "PREVIEW ONLY • DO NOT COPY");
+    txtWatermark.preferredSize.width = 220;
+
+    var wmOptRow = secPanel.add("group");
+    wmOptRow.orientation = "row";
+    wmOptRow.spacing = 15;
+    wmOptRow.add("statictext", undefined, "Watermark Style:   ");
+    var rbWmGrid = wmOptRow.add("radiobutton", undefined, "Repeating Grid (Best)");
+    var rbWmCenter = wmOptRow.add("radiobutton", undefined, "Center");
+    rbWmGrid.value = true;
+
+    var secTogglesRow = secPanel.add("group");
+    secTogglesRow.orientation = "row";
+    secTogglesRow.spacing = 12;
+    var chkAntiTrace = secTogglesRow.add("checkbox", undefined, "Anti-Trace Mesh");
+    var chkFooter = secTogglesRow.add("checkbox", undefined, "Proof Footer Strip");
+    var chkLockPdf = secTogglesRow.add("checkbox", undefined, "Lock PDF (Print Safe)");
+    chkAntiTrace.value = true;
+    chkFooter.value = true;
+    chkLockPdf.value = true;
+
+    chkWatermark.onClick = function () {
+        txtWatermark.enabled = chkWatermark.value;
+        rbWmGrid.enabled = chkWatermark.value;
+        rbWmCenter.enabled = chkWatermark.value;
+    };
+
     var optGroup = dialog.add("group");
     optGroup.orientation = "row";
     optGroup.spacing = 15;
@@ -305,10 +344,104 @@
             var placedItem = newDoc.placedItems.add();
             placedItem.file = exportedFiles[k];
             placedItem.position = [rect[0], rect[1]];
-            placedItem.width = Math.abs(rect[2] - rect[0]);
-            placedItem.height = Math.abs(rect[1] - rect[3]);
+            var abWidth = Math.abs(rect[2] - rect[0]);
+            var abHeight = Math.abs(rect[1] - rect[3]);
+            placedItem.width = abWidth;
+            placedItem.height = abHeight;
             if (!isTurbo) {
                 placedItem.embed();
+            }
+
+            var left = rect[0];
+            var top = rect[1];
+            var right = rect[2];
+            var bottom = rect[3];
+
+            // --- 1. Anti-Vector Trace Guard ---
+            if (chkAntiTrace.value) {
+                try {
+                    var traceGroup = newDoc.groupItems.add();
+                    traceGroup.opacity = 6;
+                    var lineCount = 8;
+                    var strokeCol = new RGBColor();
+                    strokeCol.red = 130; strokeCol.green = 130; strokeCol.blue = 130;
+                    for (var li = 1; li <= lineCount; li++) {
+                        var pathLine = traceGroup.pathItems.add();
+                        var startX = left + (abWidth / lineCount) * li;
+                        var startY = top;
+                        var endX = left;
+                        var endY = top - (abHeight / lineCount) * li;
+                        pathLine.setEntirePath([[startX, startY], [endX, endY]]);
+                        pathLine.filled = false;
+                        pathLine.stroked = true;
+                        pathLine.strokeWidth = 0.5;
+                        pathLine.strokeColor = strokeCol;
+                    }
+                } catch (e) {}
+            }
+
+            // --- 2. Watermark Protection ---
+            if (chkWatermark.value) {
+                try {
+                    var wmText = txtWatermark.text || "PREVIEW ONLY • DO NOT COPY";
+                    var wmGroup = newDoc.groupItems.add();
+                    wmGroup.opacity = 20;
+
+                    var wmColor = new RGBColor();
+                    wmColor.red = 110; wmColor.green = 110; wmColor.blue = 110;
+
+                    if (rbWmCenter.value) {
+                        var centerTf = wmGroup.textFrames.add();
+                        centerTf.contents = wmText;
+                        var cFontSize = Math.max(16, Math.min(abWidth, abHeight) / 10);
+                        centerTf.textRange.characterAttributes.size = cFontSize;
+                        centerTf.textRange.characterAttributes.fillColor = wmColor;
+                        centerTf.position = [left + (abWidth - centerTf.width) / 2, top - (abHeight - centerTf.height) / 2];
+                        centerTf.rotate(-35);
+                    } else {
+                        var rows = 3;
+                        var cols = 2;
+                        var stepX = abWidth / (cols + 1);
+                        var stepY = abHeight / (rows + 1);
+                        var gFontSize = Math.max(11, Math.min(abWidth, abHeight) / 20);
+
+                        for (var gr = 1; gr <= rows; gr++) {
+                            for (var gc = 1; gc <= cols; gc++) {
+                                var gTf = wmGroup.textFrames.add();
+                                gTf.contents = wmText;
+                                gTf.textRange.characterAttributes.size = gFontSize;
+                                gTf.textRange.characterAttributes.fillColor = wmColor;
+                                var gX = left + stepX * gc - (gTf.width / 2);
+                                var gY = top - stepY * gr + (gTf.height / 2);
+                                gTf.position = [gX, gY];
+                                gTf.rotate(-32);
+                            }
+                        }
+                    }
+                } catch (wmErr) {}
+            }
+
+            // --- 3. Proof & Disclaimer Footer Strip ---
+            if (chkFooter.value) {
+                try {
+                    var footerHeight = Math.max(16, Math.min(22, abHeight * 0.04));
+                    var footerRect = newDoc.pathItems.rectangle(bottom + footerHeight, left, abWidth, footerHeight);
+                    var bgFooterCol = new RGBColor();
+                    bgFooterCol.red = 26; bgFooterCol.green = 26; bgFooterCol.blue = 26;
+                    footerRect.fillColor = bgFooterCol;
+                    footerRect.stroked = false;
+                    footerRect.opacity = 88;
+
+                    var footerTf = newDoc.textFrames.add();
+                    var now = new Date();
+                    var dateStr = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
+                    footerTf.contents = "CONFIDENTIAL CLIENT PROOF • NOT FOR PRODUCTION • " + (sourceDoc.name.replace(/\.[^\.]+$/, "")) + " • " + dateStr;
+                    footerTf.textRange.characterAttributes.size = Math.max(6, footerHeight * 0.42);
+                    var textWhite = new RGBColor();
+                    textWhite.red = 230; textWhite.green = 230; textWhite.blue = 230;
+                    footerTf.textRange.characterAttributes.fillColor = textWhite;
+                    footerTf.position = [left + 8, bottom + (footerHeight * 0.72)];
+                } catch (ftErr) {}
             }
         }
 
@@ -320,6 +453,24 @@
         pdfSaveOpts.viewAfterSaving = false;
         pdfSaveOpts.optimization = true;
         pdfSaveOpts.compressArt = true;
+
+        // --- 4. PDF Security & Permissions Lock ---
+        // Blocks copying and editing, while keeping printing fully allowed for clients!
+        if (chkLockPdf.value) {
+            try {
+                pdfSaveOpts.requirePermissionPassword = true;
+                pdfSaveOpts.permissionPassword = "VG_" + (new Date().getTime());
+                pdfSaveOpts.enableCopying = false; // Block text & image extraction
+                if (typeof PDFChangesAllowedEnum !== "undefined" && PDFChangesAllowedEnum.CHANGE128NONE) {
+                    pdfSaveOpts.enableChanges = PDFChangesAllowedEnum.CHANGE128NONE; // Block edits
+                }
+                pdfSaveOpts.enableAddComment = false;
+                // Client printing is explicitly preserved as high-res print
+                if (typeof PDFPrintAllowedEnum !== "undefined" && PDFPrintAllowedEnum.PRINT128HIGHRES) {
+                    pdfSaveOpts.enablePrinting = PDFPrintAllowedEnum.PRINT128HIGHRES;
+                }
+            } catch (secErr) {}
+        }
 
         newDoc.saveAs(finalPdfFile, pdfSaveOpts);
         newDoc.close(SaveOptions.DONOTSAVECHANGES);
