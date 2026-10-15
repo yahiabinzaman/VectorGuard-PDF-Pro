@@ -1,9 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
-title VectorGuard PDF Pro - Universal Windows Installer
+title VectorGuard PDF Pro v2.0 - Universal Windows Installer
 
 echo ==============================================================================
-echo                 VectorGuard PDF Pro - Universal Windows Installer
+echo             ⚡ VectorGuard PDF Pro v2.0 - Universal Windows Installer ⚡
 echo ==============================================================================
 echo.
 

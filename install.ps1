@@ -8,7 +8,7 @@ $ErrorActionPreference = "SilentlyContinue"
 
 Write-Host ""
 Write-Host "==============================================================================" -ForegroundColor Cyan
-Write-Host "              ⚡ VectorGuard PDF Pro - Automated Installer ⚡" -ForegroundColor Cyan
+Write-Host "            ⚡ VectorGuard PDF Pro v2.0 - Automated Installer ⚡" -ForegroundColor Cyan
 Write-Host "==============================================================================" -ForegroundColor Cyan
 Write-Host ""
 

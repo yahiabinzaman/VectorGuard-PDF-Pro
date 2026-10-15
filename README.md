@@ -6,7 +6,7 @@
   ### 1-Click Client-Safe Flattened Multi-Page PDF Generator for Adobe Illustrator
 
   <p align="center">
-    <a href="https://github.com/yahiabinzaman/VectorGuard-PDF-Pro/releases"><img src="https://img.shields.io/badge/version-1.0.0-red.svg?style=for-the-badge&logo=adobe" alt="Version 1.0.0" /></a>
+    <a href="https://github.com/yahiabinzaman/VectorGuard-PDF-Pro/releases"><img src="https://img.shields.io/badge/version-2.0.0-success.svg?style=for-the-badge&logo=adobe" alt="Version 2.0.0" /></a>
     <a href="https://www.adobe.com/products/illustrator.html"><img src="https://img.shields.io/badge/Adobe%20Illustrator-CC%202019%20--%202026+-FF9A00.svg?style=for-the-badge&logo=adobeillustrator" alt="Illustrator Compatibility" /></a>
     <a href="https://github.com/yahiabinzaman/VectorGuard-PDF-Pro/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
     <a href="https://github.com/yahiabinzaman"><img src="https://img.shields.io/badge/Developer-Yahia%20Bin%20Zaman-0A84FF.svg?style=for-the-badge&logo=github" alt="Developer" /></a>
@@ -63,6 +63,11 @@ When delivering multi-page design mockups (brochures, presentations, social medi
 - **Anti-Vector Trace Guard (AI & Bot Poisoning)**: Injects subtle micro-mesh lines that break the edge-detection algorithms of Illustrator's **Image Trace** and AI vectorizers, preventing automatic vector reconstruction while remaining crystal clear for client viewing.
 - **Proof & Disclaimer Footer Strip**: Professional bottom security banner stamping `CONFIDENTIAL CLIENT PROOF • NOT FOR PRODUCTION • [DATE]` on each page.
 - **PDF Permissions & Content Lock (Print-Safe)**: Natively locks Acrobat PDF permissions against text/image extraction (`enableCopying = false`) and unauthorized page editing (`enableChanges = false`), while **explicitly preserving high-quality client printing** (`enablePrinting = PRINT128HIGHRES`) so clients can review physical hard copies!
+
+### 📐 Smart 8-Column Grid & Canvas Safety (`CoOA` Safeguard)
+- **Automatic 8-Column Grid Centering**: Automatically organizes artboards in an 8-column matrix centered around `(0, 0)` within $[-2000, +2000]$ pt.
+- **Canvas Limit Protection**: Completely resolves and eliminates the Adobe Illustrator `1095724867 ('CoOA')` / `Artboard Out of Canvas` crash on documents with 48, 64, or 100+ pages.
+- **Zero Ghost Documents**: Guaranteed safe document cleanup (`SaveOptions.DONOTSAVECHANGES`) in `finally` blocks ensures no lingering "Untitled" documents ever remain open.
 
 ### High-Speed Turbo Engine (5x–10x Faster)
 - Direct linked stream baking eliminates redundant DOM embedding overhead.

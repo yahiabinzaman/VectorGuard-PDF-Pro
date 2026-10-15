@@ -3,7 +3,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TARGET_DIR="$HOME/Library/Application Support/Adobe/CEP/extensions/VectorGuard-PDF-Pro"
 
 echo "=============================================================================="
-echo "                 VectorGuard PDF Pro - macOS Installer"
+echo "               ⚡ VectorGuard PDF Pro v2.0 - macOS Installer ⚡"
 echo "=============================================================================="
 echo ""
 
