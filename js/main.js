@@ -301,7 +301,11 @@ document.addEventListener("DOMContentLoaded", function () {
     var configStr = JSON.stringify(config).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
     setTimeout(function () {
-      csInterface.evalScript('ClientPdfHost.generatePdf("' + configStr + '")', function (res) {
+      var extPath = (csInterface.getSystemPath(SystemPath.EXTENSION) || "").replace(/\\/g, "/");
+      var loadScriptCmd = extPath ? '$.evalFile("' + extPath + '/jsx/hostscript.jsx"); ' : '';
+      var fullEvalCmd = loadScriptCmd + 'ClientPdfHost.generatePdf("' + configStr + '")';
+
+      csInterface.evalScript(fullEvalCmd, function (res) {
         btnGenerate.disabled = false;
         try {
           var data = JSON.parse(res);

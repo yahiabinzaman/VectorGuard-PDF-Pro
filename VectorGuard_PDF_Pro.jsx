@@ -346,30 +346,54 @@
         try {
             newDoc = app.documents.add(colorSpace);
 
-            var currentX = 0;
-            var currentY = 0;
-            var maxHeightInRow = 0;
-            var spacing = 80;
-            var maxRowWidth = 10000;
+            // Calculate Optimal 2D Grid Centered in Safe Canvas Zone (Max span 14000 pt: [-7000, +7000])
+            var totalPages = artboardRects.length;
+            var spacing = 40;
+            var maxCanvasSpan = 14000;
 
-            for (var k = 0; k < artboardRects.length; k++) {
+            var maxAbW = 0;
+            var maxAbH = 0;
+            var itemsDim = [];
+            for (var m = 0; m < totalPages; m++) {
+                var rM = artboardRects[m];
+                var wM = Math.abs(rM[2] - rM[0]);
+                var hM = Math.abs(rM[1] - rM[3]);
+                if (wM <= 0) wM = 595.28;
+                if (hM <= 0) hM = 841.89;
+                itemsDim.push({ w: wM, h: hM });
+                if (wM > maxAbW) maxAbW = wM;
+                if (hM > maxAbH) maxAbH = hM;
+            }
+
+            var cols = Math.ceil(Math.sqrt(totalPages));
+            if (cols < 1) cols = 1;
+            var rows = Math.ceil(totalPages / cols);
+
+            var totalRawWidth = cols * (maxAbW + spacing);
+            var totalRawHeight = rows * (maxAbH + spacing);
+
+            var gridScale = 1.0;
+            if (totalRawWidth > maxCanvasSpan || totalRawHeight > maxCanvasSpan) {
+                gridScale = Math.min(maxCanvasSpan / totalRawWidth, maxCanvasSpan / totalRawHeight);
+            }
+
+            var cellW = (maxAbW + spacing) * gridScale;
+            var cellH = (maxAbH + spacing) * gridScale;
+
+            var startX = - (cols * cellW) / 2;
+            var startY = (rows * cellH) / 2;
+
+            for (var k = 0; k < totalPages; k++) {
                 updateProgress(artboardIndices.length + 1 + k, "⚡ Placing page " + (k + 1) + " of " + artboardRects.length + "...");
-                var origRect = artboardRects[k];
-                var abWidth = Math.abs(origRect[2] - origRect[0]);
-                var abHeight = Math.abs(origRect[1] - origRect[3]);
 
-                if (abWidth <= 0) abWidth = 595.28;
-                if (abHeight <= 0) abHeight = 841.89;
+                var col = k % cols;
+                var row = Math.floor(k / cols);
 
-                // Wrap artboard to next row if needed so canvas is never exceeded
-                if (currentX + abWidth > maxRowWidth && k > 0) {
-                    currentX = 0;
-                    currentY -= (maxHeightInRow + spacing);
-                    maxHeightInRow = 0;
-                }
+                var abWidth = itemsDim[k].w * gridScale;
+                var abHeight = itemsDim[k].h * gridScale;
 
-                var left = currentX;
-                var top = currentY;
+                var left = startX + col * cellW;
+                var top = startY - row * cellH;
                 var right = left + abWidth;
                 var bottom = top - abHeight;
                 var safeRect = [left, top, right, bottom];
@@ -383,11 +407,6 @@
                     abTarget = newDoc.artboards.add(safeRect);
                     abTarget.name = artboardNames[k];
                 }
-
-                if (abHeight > maxHeightInRow) {
-                    maxHeightInRow = abHeight;
-                }
-                currentX += abWidth + spacing;
 
                 newDoc.artboards.setActiveArtboardIndex(k);
                 var placedItem = newDoc.placedItems.add();
