@@ -336,7 +336,7 @@ var ClientPdfHost = {
                 var colorSpace = sourceDoc.documentColorSpace;
                 newDoc = app.documents.add(colorSpace);
 
-                // Calculate Optimal 2D Grid Centered in Safe Canvas Zone (Max span 14000 pt: [-7000, +7000])
+                // Calculate Optimal 8-Column Grid Centered in Safe Canvas Zone (Max span 14000 pt: [-7000, +7000])
                 var totalPages = artboardRects.length;
                 var spacing = 40;
                 var maxCanvasSpan = 14000;
@@ -355,7 +355,9 @@ var ClientPdfHost = {
                     if (hM > maxAbH) maxAbH = hM;
                 }
 
-                var cols = Math.ceil(Math.sqrt(totalPages));
+                // Standard 8 columns per row (matches user layout: 8 cols x 6 rows for 48 pages)
+                var cols = 8;
+                if (totalPages < 8) cols = totalPages;
                 if (cols < 1) cols = 1;
                 var rows = Math.ceil(totalPages / cols);
 
@@ -377,11 +379,11 @@ var ClientPdfHost = {
                     var col = k % cols;
                     var row = Math.floor(k / cols);
 
-                    var abWidth = itemsDim[k].w * gridScale;
-                    var abHeight = itemsDim[k].h * gridScale;
+                    var abWidth = Math.round(itemsDim[k].w * gridScale);
+                    var abHeight = Math.round(itemsDim[k].h * gridScale);
 
-                    var left = startX + col * cellW;
-                    var top = startY - row * cellH;
+                    var left = Math.round(startX + col * cellW);
+                    var top = Math.round(startY - row * cellH);
                     var right = left + abWidth;
                     var bottom = top - abHeight;
                     var safeRect = [left, top, right, bottom];
@@ -548,7 +550,7 @@ var ClientPdfHost = {
                 }
 
             } catch (pErr) {
-                pipelineError = pErr.toString();
+                pipelineError = (pErr.line ? ("Line " + pErr.line + ": ") : "") + pErr.toString();
             } finally {
                 // ABSOLUTE GUARANTEE: Never leave an "Untitled" document open in Illustrator!
                 if (newDoc !== null) {
@@ -601,9 +603,10 @@ var ClientPdfHost = {
 
         } catch (err) {
             app.userInteractionLevel = prevInteractionLevel;
+            var fullErrMsg = (err.line ? ("Line " + err.line + ": ") : "") + err.toString();
             return JSON.stringify({
                 success: false,
-                error: err.toString()
+                error: fullErrMsg
             });
         }
     },

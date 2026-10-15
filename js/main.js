@@ -155,6 +155,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  var btnReloadPanel = document.getElementById("btnReloadPanel");
+  if (btnReloadPanel) {
+    btnReloadPanel.addEventListener("click", function () {
+      window.location.reload(true);
+    });
+  }
+
   // 5. Refresh Active Document Info
   function refreshDocInfo(forceUpdate) {
     csInterface.evalScript("ClientPdfHost.getDocInfo()", function (res) {

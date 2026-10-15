@@ -365,7 +365,9 @@
                 if (hM > maxAbH) maxAbH = hM;
             }
 
-            var cols = Math.ceil(Math.sqrt(totalPages));
+            // Standard 8 columns per row (matches user layout: 8 cols x 6 rows for 48 pages)
+            var cols = 8;
+            if (totalPages < 8) cols = totalPages;
             if (cols < 1) cols = 1;
             var rows = Math.ceil(totalPages / cols);
 
@@ -389,11 +391,11 @@
                 var col = k % cols;
                 var row = Math.floor(k / cols);
 
-                var abWidth = itemsDim[k].w * gridScale;
-                var abHeight = itemsDim[k].h * gridScale;
+                var abWidth = Math.round(itemsDim[k].w * gridScale);
+                var abHeight = Math.round(itemsDim[k].h * gridScale);
 
-                var left = startX + col * cellW;
-                var top = startY - row * cellH;
+                var left = Math.round(startX + col * cellW);
+                var top = Math.round(startY - row * cellH);
                 var right = left + abWidth;
                 var bottom = top - abHeight;
                 var safeRect = [left, top, right, bottom];
