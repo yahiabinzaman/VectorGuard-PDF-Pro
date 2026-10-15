@@ -336,29 +336,52 @@ var ClientPdfHost = {
                 var colorSpace = sourceDoc.documentColorSpace;
                 newDoc = app.documents.add(colorSpace);
 
+                var currentX = 0;
+                var currentY = 0;
+                var maxHeightInRow = 0;
+                var spacing = 80;
+                var maxRowWidth = 10000;
+
                 for (var k = 0; k < artboardRects.length; k++) {
-                    var rect = artboardRects[k];
+                    var origRect = artboardRects[k];
+                    var abWidth = Math.abs(origRect[2] - origRect[0]);
+                    var abHeight = Math.abs(origRect[1] - origRect[3]);
+
+                    if (abWidth <= 0) abWidth = 595.28;
+                    if (abHeight <= 0) abHeight = 841.89;
+
+                    // Wrap artboard to next row if needed so canvas is never exceeded
+                    if (currentX + abWidth > maxRowWidth && k > 0) {
+                        currentX = 0;
+                        currentY -= (maxHeightInRow + spacing);
+                        maxHeightInRow = 0;
+                    }
+
+                    var left = currentX;
+                    var top = currentY;
+                    var right = left + abWidth;
+                    var bottom = top - abHeight;
+                    var safeRect = [left, top, right, bottom];
+
                     var abTarget;
                     if (k === 0) {
                         abTarget = newDoc.artboards[0];
-                        abTarget.artboardRect = rect;
+                        abTarget.artboardRect = safeRect;
                         abTarget.name = artboardNames[0];
                     } else {
-                        abTarget = newDoc.artboards.add(rect);
+                        abTarget = newDoc.artboards.add(safeRect);
                         abTarget.name = artboardNames[k];
                     }
+
+                    if (abHeight > maxHeightInRow) {
+                        maxHeightInRow = abHeight;
+                    }
+                    currentX += abWidth + spacing;
 
                     newDoc.artboards.setActiveArtboardIndex(k);
 
                     var placed = newDoc.placedItems.add();
                     placed.file = exportedFiles[k];
-
-                    var left = rect[0];
-                    var top = rect[1];
-                    var right = rect[2];
-                    var bottom = rect[3];
-                    var abWidth = Math.abs(right - left);
-                    var abHeight = Math.abs(top - bottom);
 
                     placed.position = [left, top];
                     placed.width = abWidth;
