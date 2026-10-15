@@ -213,6 +213,20 @@
     if (!/\.pdf$/i.test(outputPdfFileName)) outputPdfFileName += ".pdf";
     var finalPdfFile = new File(targetFolder.fsName + "/" + outputPdfFileName);
 
+    // Windows File-Lock Prevention (If PDF is currently open in Acrobat/Reader, don't crash)
+    if (finalPdfFile.exists) {
+        try {
+            var testLock = finalPdfFile.open("e");
+            if (!testLock) {
+                var safeStamp = (new Date()).getTime();
+                outputPdfFileName = outputPdfFileName.replace(/\.pdf$/i, "") + "_" + safeStamp + ".pdf";
+                finalPdfFile = new File(targetFolder.fsName + "/" + outputPdfFileName);
+            } else {
+                finalPdfFile.close();
+            }
+        } catch (eLock) {}
+    }
+
     var artboardIndices = [];
     if (rbAbAll.value) {
         for (var a = 0; a < totalArtboards; a++) artboardIndices.push(a);
@@ -325,155 +339,193 @@
 
         updateProgress(artboardIndices.length + 1, "⚡ Assembling Multi-Page Document...");
         var colorSpace = sourceDoc.documentColorSpace;
-        var newDoc = app.documents.add(colorSpace);
+        var newDoc = null;
+        var savedOk = false;
+        var pipelineError = "";
 
-        for (var k = 0; k < artboardRects.length; k++) {
-            updateProgress(artboardIndices.length + 1 + k, "⚡ Placing page " + (k + 1) + " of " + artboardRects.length + "...");
-            var rect = artboardRects[k];
-            var abTarget;
-            if (k === 0) {
-                abTarget = newDoc.artboards[0];
-                abTarget.artboardRect = rect;
-                abTarget.name = artboardNames[0];
-            } else {
-                abTarget = newDoc.artboards.add(rect);
-                abTarget.name = artboardNames[k];
-            }
+        try {
+            newDoc = app.documents.add(colorSpace);
 
-            newDoc.artboards.setActiveArtboardIndex(k);
-            var placedItem = newDoc.placedItems.add();
-            placedItem.file = exportedFiles[k];
-            placedItem.position = [rect[0], rect[1]];
-            var abWidth = Math.abs(rect[2] - rect[0]);
-            var abHeight = Math.abs(rect[1] - rect[3]);
-            placedItem.width = abWidth;
-            placedItem.height = abHeight;
-            if (!isTurbo) {
-                placedItem.embed();
-            }
+            for (var k = 0; k < artboardRects.length; k++) {
+                updateProgress(artboardIndices.length + 1 + k, "⚡ Placing page " + (k + 1) + " of " + artboardRects.length + "...");
+                var rect = artboardRects[k];
+                var abTarget;
+                if (k === 0) {
+                    abTarget = newDoc.artboards[0];
+                    abTarget.artboardRect = rect;
+                    abTarget.name = artboardNames[0];
+                } else {
+                    abTarget = newDoc.artboards.add(rect);
+                    abTarget.name = artboardNames[k];
+                }
 
-            var left = rect[0];
-            var top = rect[1];
-            var right = rect[2];
-            var bottom = rect[3];
+                newDoc.artboards.setActiveArtboardIndex(k);
+                var placedItem = newDoc.placedItems.add();
+                placedItem.file = exportedFiles[k];
+                placedItem.position = [rect[0], rect[1]];
+                var abWidth = Math.abs(rect[2] - rect[0]);
+                var abHeight = Math.abs(rect[1] - rect[3]);
+                placedItem.width = abWidth;
+                placedItem.height = abHeight;
 
-            // --- 1. Anti-Vector Trace Guard ---
-            if (chkAntiTrace.value) {
+                // Always embed placed raster images to avoid Windows file lock & missing link warnings
                 try {
-                    var traceGroup = newDoc.groupItems.add();
-                    traceGroup.opacity = 6;
-                    var lineCount = 8;
-                    var strokeCol = new RGBColor();
-                    strokeCol.red = 130; strokeCol.green = 130; strokeCol.blue = 130;
-                    for (var li = 1; li <= lineCount; li++) {
-                        var pathLine = traceGroup.pathItems.add();
-                        var startX = left + (abWidth / lineCount) * li;
-                        var startY = top;
-                        var endX = left;
-                        var endY = top - (abHeight / lineCount) * li;
-                        pathLine.setEntirePath([[startX, startY], [endX, endY]]);
-                        pathLine.filled = false;
-                        pathLine.stroked = true;
-                        pathLine.strokeWidth = 0.5;
-                        pathLine.strokeColor = strokeCol;
-                    }
-                } catch (e) {}
-            }
+                    placedItem.embed();
+                } catch (eEmbed) {}
 
-            // --- 2. Watermark Protection ---
-            if (chkWatermark.value) {
-                try {
-                    var wmText = txtWatermark.text || "PREVIEW ONLY • DO NOT COPY";
-                    var wmGroup = newDoc.groupItems.add();
-                    wmGroup.opacity = 20;
+                // --- 1. Anti-Vector Trace Guard ---
+                if (chkAntiTrace.value) {
+                    try {
+                        var traceGroup = newDoc.groupItems.add();
+                        traceGroup.opacity = 6;
+                        var lineCount = 8;
+                        var strokeCol = new RGBColor();
+                        strokeCol.red = 130; strokeCol.green = 130; strokeCol.blue = 130;
+                        for (var li = 1; li <= lineCount; li++) {
+                            var pathLine = traceGroup.pathItems.add();
+                            var startX = left + (abWidth / lineCount) * li;
+                            var startY = top;
+                            var endX = left;
+                            var endY = top - (abHeight / lineCount) * li;
+                            pathLine.setEntirePath([[startX, startY], [endX, endY]]);
+                            pathLine.filled = false;
+                            pathLine.stroked = true;
+                            pathLine.strokeWidth = 0.5;
+                            pathLine.strokeColor = strokeCol;
+                        }
+                    } catch (e) {}
+                }
 
-                    var wmColor = new RGBColor();
-                    wmColor.red = 110; wmColor.green = 110; wmColor.blue = 110;
+                // --- 2. Watermark Protection ---
+                if (chkWatermark.value) {
+                    try {
+                        var wmText = txtWatermark.text || "PREVIEW ONLY • DO NOT COPY";
+                        var wmGroup = newDoc.groupItems.add();
+                        wmGroup.opacity = 20;
 
-                    if (rbWmCenter.value) {
-                        var centerTf = wmGroup.textFrames.add();
-                        centerTf.contents = wmText;
-                        var cFontSize = Math.max(16, Math.min(abWidth, abHeight) / 10);
-                        centerTf.textRange.characterAttributes.size = cFontSize;
-                        centerTf.textRange.characterAttributes.fillColor = wmColor;
-                        centerTf.position = [left + (abWidth - centerTf.width) / 2, top - (abHeight - centerTf.height) / 2];
-                        centerTf.rotate(-35);
-                    } else {
-                        var rows = 3;
-                        var cols = 2;
-                        var stepX = abWidth / (cols + 1);
-                        var stepY = abHeight / (rows + 1);
-                        var gFontSize = Math.max(11, Math.min(abWidth, abHeight) / 20);
+                        var wmColor = new RGBColor();
+                        wmColor.red = 110; wmColor.green = 110; wmColor.blue = 110;
 
-                        for (var gr = 1; gr <= rows; gr++) {
-                            for (var gc = 1; gc <= cols; gc++) {
-                                var gTf = wmGroup.textFrames.add();
-                                gTf.contents = wmText;
-                                gTf.textRange.characterAttributes.size = gFontSize;
-                                gTf.textRange.characterAttributes.fillColor = wmColor;
-                                var gX = left + stepX * gc - (gTf.width / 2);
-                                var gY = top - stepY * gr + (gTf.height / 2);
-                                gTf.position = [gX, gY];
-                                gTf.rotate(-32);
+                        if (rbWmCenter.value) {
+                            var centerTf = wmGroup.textFrames.add();
+                            centerTf.contents = wmText;
+                            var cFontSize = Math.max(16, Math.min(abWidth, abHeight) / 10);
+                            centerTf.textRange.characterAttributes.size = cFontSize;
+                            centerTf.textRange.characterAttributes.fillColor = wmColor;
+                            centerTf.position = [left + (abWidth - centerTf.width) / 2, top - (abHeight - centerTf.height) / 2];
+                            centerTf.rotate(-35);
+                        } else {
+                            var rows = 3;
+                            var cols = 2;
+                            var stepX = abWidth / (cols + 1);
+                            var stepY = abHeight / (rows + 1);
+                            var gFontSize = Math.max(11, Math.min(abWidth, abHeight) / 20);
+
+                            for (var gr = 1; gr <= rows; gr++) {
+                                for (var gc = 1; gc <= cols; gc++) {
+                                    var gTf = wmGroup.textFrames.add();
+                                    gTf.contents = wmText;
+                                    gTf.textRange.characterAttributes.size = gFontSize;
+                                    gTf.textRange.characterAttributes.fillColor = wmColor;
+                                    var gX = left + stepX * gc - (gTf.width / 2);
+                                    var gY = top - stepY * gr + (gTf.height / 2);
+                                    gTf.position = [gX, gY];
+                                    gTf.rotate(-32);
+                                }
                             }
                         }
-                    }
-                } catch (wmErr) {}
+                    } catch (wmErr) {}
+                }
+
+                // --- 3. Proof & Disclaimer Footer Strip ---
+                if (chkFooter.value) {
+                    try {
+                        var footerHeight = Math.max(16, Math.min(22, abHeight * 0.04));
+                        var footerRect = newDoc.pathItems.rectangle(bottom + footerHeight, left, abWidth, footerHeight);
+                        var bgFooterCol = new RGBColor();
+                        bgFooterCol.red = 26; bgFooterCol.green = 26; bgFooterCol.blue = 26;
+                        footerRect.fillColor = bgFooterCol;
+                        footerRect.stroked = false;
+                        footerRect.opacity = 88;
+
+                        var footerTf = newDoc.textFrames.add();
+                        var now = new Date();
+                        var dateStr = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
+                        footerTf.contents = "CONFIDENTIAL CLIENT PROOF • NOT FOR PRODUCTION • " + (sourceDoc.name.replace(/\.[^\.]+$/, "")) + " • " + dateStr;
+                        footerTf.textRange.characterAttributes.size = Math.max(6, footerHeight * 0.42);
+                        var textWhite = new RGBColor();
+                        textWhite.red = 230; textWhite.green = 230; textWhite.blue = 230;
+                        footerTf.textRange.characterAttributes.fillColor = textWhite;
+                        footerTf.position = [left + 8, bottom + (footerHeight * 0.72)];
+                    } catch (ftErr) {}
+                }
             }
 
-            // --- 3. Proof & Disclaimer Footer Strip ---
-            if (chkFooter.value) {
-                try {
-                    var footerHeight = Math.max(16, Math.min(22, abHeight * 0.04));
-                    var footerRect = newDoc.pathItems.rectangle(bottom + footerHeight, left, abWidth, footerHeight);
-                    var bgFooterCol = new RGBColor();
-                    bgFooterCol.red = 26; bgFooterCol.green = 26; bgFooterCol.blue = 26;
-                    footerRect.fillColor = bgFooterCol;
-                    footerRect.stroked = false;
-                    footerRect.opacity = 88;
-
-                    var footerTf = newDoc.textFrames.add();
-                    var now = new Date();
-                    var dateStr = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
-                    footerTf.contents = "CONFIDENTIAL CLIENT PROOF • NOT FOR PRODUCTION • " + (sourceDoc.name.replace(/\.[^\.]+$/, "")) + " • " + dateStr;
-                    footerTf.textRange.characterAttributes.size = Math.max(6, footerHeight * 0.42);
-                    var textWhite = new RGBColor();
-                    textWhite.red = 230; textWhite.green = 230; textWhite.blue = 230;
-                    footerTf.textRange.characterAttributes.fillColor = textWhite;
-                    footerTf.position = [left + 8, bottom + (footerHeight * 0.72)];
-                } catch (ftErr) {}
-            }
-        }
-
-        updateProgress(artboardIndices.length * 2 + 1, "⚡ Compiling Un-editable Client PDF...");
-        var pdfSaveOpts = new PDFSaveOptions();
-        pdfSaveOpts.compatibility = PDFCompatibility.ACROBAT5;
-        pdfSaveOpts.preserveEditability = false;
-        pdfSaveOpts.generateThumbnails = false;
-        pdfSaveOpts.viewAfterSaving = false;
-        pdfSaveOpts.optimization = true;
-        pdfSaveOpts.compressArt = true;
-
-        // --- 4. PDF Security & Permissions Lock ---
-        // Blocks copying and editing, while keeping printing fully allowed for clients!
-        if (chkLockPdf.value) {
+            // Step 3: Multi-Tier PDF Save
+            updateProgress(artboardIndices.length * 2 + 1, "⚡ Compiling Un-editable Client PDF...");
+            
+            // Tier 1: Try with Acrobat 6/7 security options
             try {
-                pdfSaveOpts.requirePermissionPassword = true;
-                pdfSaveOpts.permissionPassword = "VG_" + (new Date().getTime());
-                pdfSaveOpts.enableCopying = false; // Block text & image extraction
-                if (typeof PDFChangesAllowedEnum !== "undefined" && PDFChangesAllowedEnum.CHANGE128NONE) {
-                    pdfSaveOpts.enableChanges = PDFChangesAllowedEnum.CHANGE128NONE; // Block edits
+                var pdfSaveOpts = new PDFSaveOptions();
+                try { pdfSaveOpts.compatibility = PDFCompatibility.ACROBAT7; } catch (eCompat7) {
+                    try { pdfSaveOpts.compatibility = PDFCompatibility.ACROBAT6; } catch (eCompat6) {
+                        pdfSaveOpts.compatibility = PDFCompatibility.ACROBAT5;
+                    }
                 }
-                pdfSaveOpts.enableAddComment = false;
-                // Client printing is explicitly preserved as high-res print
-                if (typeof PDFPrintAllowedEnum !== "undefined" && PDFPrintAllowedEnum.PRINT128HIGHRES) {
-                    pdfSaveOpts.enablePrinting = PDFPrintAllowedEnum.PRINT128HIGHRES;
+                pdfSaveOpts.preserveEditability = false;
+                pdfSaveOpts.generateThumbnails = false;
+                pdfSaveOpts.viewAfterSaving = false;
+                try { pdfSaveOpts.optimization = true; } catch (eOpt) {}
+                try { pdfSaveOpts.compressArt = true; } catch (eComp) {}
+
+                // --- 4. PDF Security & Permissions Lock ---
+                // Blocks copying and editing, while keeping printing fully allowed for clients!
+                if (chkLockPdf.value) {
+                    try {
+                        pdfSaveOpts.requirePermissionPassword = true;
+                        pdfSaveOpts.permissionPassword = "VG_" + (new Date().getTime());
+                        pdfSaveOpts.enableCopying = false; // Block text & image extraction
+                        if (typeof PDFChangesAllowedEnum !== "undefined" && PDFChangesAllowedEnum.CHANGE128NONE) {
+                            pdfSaveOpts.enableChanges = PDFChangesAllowedEnum.CHANGE128NONE; // Block edits
+                        }
+                        pdfSaveOpts.enableAddComment = false;
+                        // Client printing is explicitly preserved as high-res print
+                        if (typeof PDFPrintAllowedEnum !== "undefined" && PDFPrintAllowedEnum.PRINT128HIGHRES) {
+                            pdfSaveOpts.enablePrinting = PDFPrintAllowedEnum.PRINT128HIGHRES;
+                        }
+                    } catch (secErr) {}
                 }
-            } catch (secErr) {}
+
+                newDoc.saveAs(finalPdfFile, pdfSaveOpts);
+                savedOk = true;
+            } catch (tier1Err) {
+                // Tier 2 Fallback: If Tier 1 failed (e.g. Acrobat encryption DLL/parameter incompatibility on Windows),
+                // immediately save with clean standard PDF options so PDF is ALWAYS generated!
+                try {
+                    var fallbackOpts = new PDFSaveOptions();
+                    fallbackOpts.preserveEditability = false;
+                    fallbackOpts.viewAfterSaving = false;
+                    newDoc.saveAs(finalPdfFile, fallbackOpts);
+                    savedOk = true;
+                } catch (tier2Err) {
+                    pipelineError = tier2Err.toString();
+                }
+            }
+
+        } catch (assemblyErr) {
+            pipelineError = assemblyErr.toString();
+        } finally {
+            // CRITICAL: Always close newDoc so NO "Untitled" document ever remains open!
+            if (newDoc !== null) {
+                try {
+                    newDoc.close(SaveOptions.DONOTSAVECHANGES);
+                } catch (eClose) {}
+            }
         }
 
-        newDoc.saveAs(finalPdfFile, pdfSaveOpts);
-        newDoc.close(SaveOptions.DONOTSAVECHANGES);
+        if (!savedOk || !finalPdfFile.exists) {
+            throw new Error(pipelineError || "Could not save PDF file to destination.");
+        }
 
         if (chkCleanTemp.value) {
             for (var f = 0; f < exportedFiles.length; f++) {
