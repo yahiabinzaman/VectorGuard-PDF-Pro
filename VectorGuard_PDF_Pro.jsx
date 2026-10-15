@@ -483,7 +483,7 @@
                 if (chkLockPdf.value) {
                     try {
                         pdfSaveOpts.requirePermissionPassword = true;
-                        pdfSaveOpts.permissionPassword = "VG_" + (new Date().getTime());
+                        pdfSaveOpts.permissionPassword = "VectorGuard";
                         pdfSaveOpts.enableCopying = false; // Block text & image extraction
                         if (typeof PDFChangesAllowedEnum !== "undefined" && PDFChangesAllowedEnum.CHANGE128NONE) {
                             pdfSaveOpts.enableChanges = PDFChangesAllowedEnum.CHANGE128NONE; // Block edits

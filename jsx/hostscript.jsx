@@ -478,7 +478,7 @@ var ClientPdfHost = {
                     if (cfg.lockPdfPermissions !== false) {
                         try {
                             pdfOptions.requirePermissionPassword = true;
-                            pdfOptions.permissionPassword = "VG_" + (new Date().getTime());
+                            pdfOptions.permissionPassword = cfg.permissionPassword || "VectorGuard";
                             pdfOptions.enableCopying = false;
                             if (typeof PDFChangesAllowedEnum !== "undefined" && PDFChangesAllowedEnum.CHANGE128NONE) {
                                 pdfOptions.enableChanges = PDFChangesAllowedEnum.CHANGE128NONE;
