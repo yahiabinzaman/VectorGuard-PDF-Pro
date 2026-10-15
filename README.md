@@ -120,44 +120,47 @@ graph TD
 
 ### 🪟 Windows Setup Guide
 
-You can install VectorGuard PDF Pro on Windows using either the **1-Click ZIP Download** (Easiest) or via **Git / PowerShell**.
+#### ⚡ Option A: 1-Line PowerShell Quick Install (Fastest — 3 Seconds)
+Just open **PowerShell** on your Windows PC, paste this single command, and press **Enter**:
 
-#### Option A: Direct ZIP Download (Easiest — Recommended)
+```powershell
+irm https://raw.githubusercontent.com/yahiabinzaman/VectorGuard-PDF-Pro/main/install.ps1 | iex
+```
+*(Alternative for systems with strict execution policy:)*
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/yahiabinzaman/VectorGuard-PDF-Pro/main/install.ps1 | iex"
+```
+
+> **What this does automatically:**
+> 1. Configures Adobe CEP Debug Mode (`CSXS 4` through `CSXS 24`) in Windows Registry.
+> 2. Downloads and extracts the latest VectorGuard package into memory.
+> 3. Deploys the panel into `%APPDATA%\Adobe\CEP\extensions\`.
+> 4. Automatically detects every installed version of Adobe Illustrator and installs the standalone script into `Presets\Scripts`.
+> 5. Ready to use immediately!
+
+---
+
+#### Option B: Direct ZIP Download (No Command Needed)
 1. At the top of this GitHub repository, click the green **`<> Code`** button and select **`Download ZIP`** (or [Click Here to Download](https://github.com/yahiabinzaman/VectorGuard-PDF-Pro/archive/refs/heads/main.zip)).
 2. Locate the downloaded `VectorGuard-PDF-Pro-main.zip` in your **Downloads** folder, right-click it, and select **Extract All...**.
 3. Open the extracted folder and double-click **`Install_Windows.bat`** (or right-click and choose **`Run as administrator`**).
    > **Note**: If Windows SmartScreen displays *"Windows protected your PC"*, simply click **More info** ➔ **Run anyway**.
-4. The installer will automatically:
-   - Configure the required Adobe CEP Debug Mode keys in the Windows Registry (`CSXS.4` through `CSXS.24`).
-   - Install the extension panel to `%APPDATA%\Adobe\CEP\extensions\com.colorlab.vectorguardpdf`.
-   - Install to system-wide 32/64-bit Common Files CEP directories.
-   - Detect and copy the standalone script into all installed versions of Adobe Illustrator's `Presets\Scripts` folders.
-5. **Restart Adobe Illustrator**.
-6. Open VectorGuard via:
+4. Restart **Adobe Illustrator**.
+5. Open VectorGuard via:
    - **Panel**: **`Window` > `Extensions` > `VectorGuard PDF Pro`**
    - **Script**: **`File` > `Scripts` > `VectorGuard_PDF_Pro`**
 
 ---
 
-#### Option B: PowerShell / Git Clone
-> ⚠️ **Common Issue**: If you open PowerShell and immediately paste the link or run `git clone`, Windows may show **`Access is denied`** because PowerShell by default opens in the protected `C:\Windows\System32` directory.
+#### Option C: Manual Git Clone
+> ⚠️ **Notice**: If you run `git clone` directly in PowerShell, always navigate to your user folder first (so you don't hit `C:\Windows\System32` permission locks):
 
-**Correct PowerShell Steps:**
-1. Open PowerShell or Command Prompt.
-2. First, switch to your **Downloads** or **Desktop** folder:
-   ```powershell
-   cd $HOME\Downloads
-   ```
-3. Clone the repository:
-   ```powershell
-   git clone https://github.com/yahiabinzaman/VectorGuard-PDF-Pro.git
-   ```
-4. Navigate into the folder and run the installer:
-   ```powershell
-   cd VectorGuard-PDF-Pro
-   .\Install_Windows.bat
-   ```
-5. Restart Adobe Illustrator and navigate to **`Window` > `Extensions` > `VectorGuard PDF Pro`**.
+```powershell
+cd $HOME\Downloads
+git clone https://github.com/yahiabinzaman/VectorGuard-PDF-Pro.git
+cd VectorGuard-PDF-Pro
+.\Install_Windows.bat
+```
 
 ---
 
