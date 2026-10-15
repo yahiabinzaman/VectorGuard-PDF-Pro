@@ -118,34 +118,98 @@ graph TD
 
 ## Installation Guide (Windows & Mac)
 
-### Windows (1-Click Automated Batch Setup)
-1. Download or clone this repository on your Windows PC:
-   ```cmd
-   git clone https://github.com/yahiabinzaman/VectorGuard-PDF-Pro.git
-   ```
-2. Double-click **`Install_Windows.bat`**.
-   - *It will automatically enable Adobe CEP Debug Mode and install the extension into `%APPDATA%\Adobe\CEP\extensions\`*.
-3. Restart **Adobe Illustrator**.
-4. Open the panel via: **`Window` > `Extensions` > `VectorGuard PDF Pro`**.
+### 🪟 Windows Setup Guide
+
+You can install VectorGuard PDF Pro on Windows using either the **1-Click ZIP Download** (Easiest) or via **Git / PowerShell**.
+
+#### Option A: Direct ZIP Download (Easiest — Recommended)
+1. At the top of this GitHub repository, click the green **`<> Code`** button and select **`Download ZIP`** (or [Click Here to Download](https://github.com/yahiabinzaman/VectorGuard-PDF-Pro/archive/refs/heads/main.zip)).
+2. Locate the downloaded `VectorGuard-PDF-Pro-main.zip` in your **Downloads** folder, right-click it, and select **Extract All...**.
+3. Open the extracted folder and double-click **`Install_Windows.bat`** (or right-click and choose **`Run as administrator`**).
+   > **Note**: If Windows SmartScreen displays *"Windows protected your PC"*, simply click **More info** ➔ **Run anyway**.
+4. The installer will automatically:
+   - Configure the required Adobe CEP Debug Mode keys in the Windows Registry (`CSXS.4` through `CSXS.24`).
+   - Install the extension panel to `%APPDATA%\Adobe\CEP\extensions\com.colorlab.vectorguardpdf`.
+   - Install to system-wide 32/64-bit Common Files CEP directories.
+   - Detect and copy the standalone script into all installed versions of Adobe Illustrator's `Presets\Scripts` folders.
+5. **Restart Adobe Illustrator**.
+6. Open VectorGuard via:
+   - **Panel**: **`Window` > `Extensions` > `VectorGuard PDF Pro`**
+   - **Script**: **`File` > `Scripts` > `VectorGuard_PDF_Pro`**
 
 ---
 
-### macOS (1-Click Automated Command Setup)
+#### Option B: PowerShell / Git Clone
+> ⚠️ **Common Issue**: If you open PowerShell and immediately paste the link or run `git clone`, Windows may show **`Access is denied`** because PowerShell by default opens in the protected `C:\Windows\System32` directory.
+
+**Correct PowerShell Steps:**
+1. Open PowerShell or Command Prompt.
+2. First, switch to your **Downloads** or **Desktop** folder:
+   ```powershell
+   cd $HOME\Downloads
+   ```
+3. Clone the repository:
+   ```powershell
+   git clone https://github.com/yahiabinzaman/VectorGuard-PDF-Pro.git
+   ```
+4. Navigate into the folder and run the installer:
+   ```powershell
+   cd VectorGuard-PDF-Pro
+   .\Install_Windows.bat
+   ```
+5. Restart Adobe Illustrator and navigate to **`Window` > `Extensions` > `VectorGuard PDF Pro`**.
+
+---
+
+### 🍎 macOS Setup Guide
+
 1. Download or clone this repository:
    ```bash
+   cd ~/Downloads
    git clone https://github.com/yahiabinzaman/VectorGuard-PDF-Pro.git
    ```
-2. Double-click **`Install_Mac.command`** (or run `bash Install_Mac.command` in Terminal).
+   *(Or download the ZIP file from GitHub and extract it).*
+2. Open the project folder and double-click **`Install_Mac.command`** (or run `bash Install_Mac.command` in Terminal).
 3. Restart **Adobe Illustrator**.
-4. Open the panel via: **`Window` > `Extensions` > `VectorGuard PDF Pro`**.
+4. Open the panel via: **`Window` > `Extensions` > `VectorGuard PDF Pro`** (or **`File` > `Scripts` > `VectorGuard_PDF_Pro`**).
 
 ---
 
-### Standalone Script (.jsx)
-If you prefer running VectorGuard as a standalone script without using the CEP panel:
-1. Open your project in Adobe Illustrator.
-2. Go to: **`File` > `Scripts` > `Other Script...`** (`Cmd + F12` on Mac / `Ctrl + F12` on Windows).
-3. Select [`VectorGuard_PDF_Pro.jsx`](VectorGuard_PDF_Pro.jsx).
+### 📂 Manual Installation (File Locations Reference)
+
+If you prefer to manually place files without running the automatic batch script:
+
+| Platform | Component | Target Installation Directory |
+| :--- | :--- | :--- |
+| **Windows** | **CEP Extension Panel** | `%APPDATA%\Adobe\CEP\extensions\com.colorlab.vectorguardpdf\`<br>*(e.g. `C:\Users\<Username>\AppData\Roaming\Adobe\CEP\extensions\`)* |
+| **Windows** | **System Common CEP** | `C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\` |
+| **Windows** | **Standalone Script** | `C:\Program Files\Adobe\Adobe Illustrator <Year>\Presets\<Locale>\Scripts\VectorGuard_PDF_Pro.jsx` |
+| **macOS** | **CEP Extension Panel** | `~/Library/Application Support/Adobe/CEP/extensions/com.colorlab.vectorguardpdf/` |
+| **macOS** | **Standalone Script** | `/Applications/Adobe Illustrator <Year>/Presets.localized/<Locale>/Scripts/VectorGuard_PDF_Pro.jsx` |
+
+#### Manual Registry Activation (Windows Only):
+If installing manually on Windows, you must enable `PlayerDebugMode` in the Registry so Illustrator loads unsigned extensions:
+Open PowerShell as Administrator and run:
+```powershell
+for ($i=4; $i -le 24; $i++) {
+    reg add "HKEY_CURRENT_USER\Software\Adobe\CSXS.$i" /v PlayerDebugMode /t REG_SZ /d 1 /f
+    reg add "HKEY_LOCAL_MACHINE\Software\Adobe\CSXS.$i" /v PlayerDebugMode /t REG_SZ /d 1 /f
+}
+```
+
+---
+
+### ❓ Troubleshooting & FAQs
+
+- **Q: Why does PowerShell say "Access is denied" when I paste the link on Windows?**
+  - **A**: This happens if PowerShell is running inside `C:\Windows\System32` (which is write-protected) or if you paste a raw URL without typing `git clone` first. Always run `cd $HOME\Downloads` before cloning, or simply download the ZIP file directly from the GitHub page.
+- **Q: VectorGuard PDF Pro does not appear under Window > Extensions?**
+  - **A**: 
+    1. Make sure Illustrator was completely closed and restarted after installation.
+    2. Run `Install_Windows.bat` (or `Install_Mac.command`) again as Administrator to ensure debug mode registry keys are applied.
+    3. You can always use the direct script version anytime via **`File` > `Scripts` > `VectorGuard_PDF_Pro`** without needing the extensions menu.
+- **Q: Will clients still be able to print the proof?**
+  - **A**: **Yes!** Unlike other PDF protectors that disable printing, VectorGuard explicitly preserves high-resolution printing (`enablePrinting = PRINT128HIGHRES`) so clients can print physical test copies for review. Content copying and vector file extraction remain 100% blocked.
 
 ---
 
