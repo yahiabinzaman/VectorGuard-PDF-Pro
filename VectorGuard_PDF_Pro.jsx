@@ -366,13 +366,13 @@
             }
 
             // Standard 8 columns per row (matches user layout: 8 cols x 6 rows for 48 pages)
-            var cols = 8;
-            if (totalPages < 8) cols = totalPages;
-            if (cols < 1) cols = 1;
-            var rows = Math.ceil(totalPages / cols);
+            var gridCols = 8;
+            if (totalPages < 8) gridCols = totalPages;
+            if (gridCols < 1) gridCols = 1;
+            var gridRows = Math.ceil(totalPages / gridCols);
 
-            var totalRawWidth = cols * (maxAbW + spacing);
-            var totalRawHeight = rows * (maxAbH + spacing);
+            var totalRawWidth = gridCols * (maxAbW + spacing);
+            var totalRawHeight = gridRows * (maxAbH + spacing);
 
             var gridScale = 1.0;
             if (totalRawWidth > maxCanvasSpan || totalRawHeight > maxCanvasSpan) {
@@ -382,20 +382,20 @@
             var cellW = (maxAbW + spacing) * gridScale;
             var cellH = (maxAbH + spacing) * gridScale;
 
-            var startX = - (cols * cellW) / 2;
-            var startY = (rows * cellH) / 2;
+            var gridStartX = - (gridCols * cellW) / 2;
+            var gridStartY = (gridRows * cellH) / 2;
 
             for (var k = 0; k < totalPages; k++) {
                 updateProgress(artboardIndices.length + 1 + k, "⚡ Placing page " + (k + 1) + " of " + artboardRects.length + "...");
 
-                var col = k % cols;
-                var row = Math.floor(k / cols);
+                var colIdx = k % gridCols;
+                var rowIdx = Math.floor(k / gridCols);
 
                 var abWidth = Math.round(itemsDim[k].w * gridScale);
                 var abHeight = Math.round(itemsDim[k].h * gridScale);
 
-                var left = Math.round(startX + col * cellW);
-                var top = Math.round(startY - row * cellH);
+                var left = Math.round(gridStartX + colIdx * cellW);
+                var top = Math.round(gridStartY - rowIdx * cellH);
                 var right = left + abWidth;
                 var bottom = top - abHeight;
                 var safeRect = [left, top, right, bottom];
@@ -432,11 +432,11 @@
                         strokeCol.red = 130; strokeCol.green = 130; strokeCol.blue = 130;
                         for (var li = 1; li <= lineCount; li++) {
                             var pathLine = traceGroup.pathItems.add();
-                            var startX = left + (abWidth / lineCount) * li;
-                            var startY = top;
-                            var endX = left;
-                            var endY = top - (abHeight / lineCount) * li;
-                            pathLine.setEntirePath([[startX, startY], [endX, endY]]);
+                            var lineStartX = left + (abWidth / lineCount) * li;
+                            var lineStartY = top;
+                            var lineEndX = left;
+                            var lineEndY = top - (abHeight / lineCount) * li;
+                            pathLine.setEntirePath([[lineStartX, lineStartY], [lineEndX, lineEndY]]);
                             pathLine.filled = false;
                             pathLine.stroked = true;
                             pathLine.strokeWidth = 0.5;
@@ -464,14 +464,14 @@
                             centerTf.position = [left + (abWidth - centerTf.width) / 2, top - (abHeight - centerTf.height) / 2];
                             centerTf.rotate(-35);
                         } else {
-                            var rows = 3;
-                            var cols = 2;
-                            var stepX = abWidth / (cols + 1);
-                            var stepY = abHeight / (rows + 1);
+                            var wmGridRows = 3;
+                            var wmGridCols = 2;
+                            var stepX = abWidth / (wmGridCols + 1);
+                            var stepY = abHeight / (wmGridRows + 1);
                             var gFontSize = Math.max(11, Math.min(abWidth, abHeight) / 20);
 
-                            for (var gr = 1; gr <= rows; gr++) {
-                                for (var gc = 1; gc <= cols; gc++) {
+                            for (var gr = 1; gr <= wmGridRows; gr++) {
+                                for (var gc = 1; gc <= wmGridCols; gc++) {
                                     var gTf = wmGroup.textFrames.add();
                                     gTf.contents = wmText;
                                     gTf.textRange.characterAttributes.size = gFontSize;
